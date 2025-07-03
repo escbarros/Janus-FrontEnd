@@ -4,5 +4,6 @@
         "source.organizeImports": "explicit",
         "source.sortMembers": "explicit"
     },
-    "cSpell.words": ["janusfrontend"]
+    "cSpell.words": ["janusfrontend", "nativewind"],
+    "cSpell.ignoreWords": ["Baloo"]
 }
