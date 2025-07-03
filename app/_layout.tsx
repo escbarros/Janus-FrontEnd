@@ -2,6 +2,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
+import { log } from '@/constants';
 import { useEffect } from 'react';
 import '../global.css';
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +17,7 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
+        log.debug('a');
         if (fontsLoaded || fontError) {
             SplashScreen.hideAsync();
         }
