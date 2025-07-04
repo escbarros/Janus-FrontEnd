@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import '../global.css';
 import '../i18n';
 SplashScreen.preventAutoHideAsync();
@@ -31,8 +31,11 @@ export default function RootLayout() {
         );
     }
     return (
-        <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-        </Stack>
+        <>
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(auth)" />
+            </Stack>
+            <StatusBar barStyle={'light-content'} />
+        </>
     );
 }

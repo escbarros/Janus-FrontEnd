@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
-import '../global.css';
 
 export default function Index() {
     const { t } = useTranslation();

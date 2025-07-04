@@ -1,4 +1,22 @@
 import { consoleTransport, logger } from 'react-native-logs';
+import logo from '../assets/images/logo.png';
+export const images = {
+    logo,
+};
+export const onboardingSteps = [
+    {
+        title: 'onboarding.welcomeTitle',
+        subtitle: 'onboarding.welcomeSubtitle',
+    },
+    {
+        title: 'onboarding.communicationTitle',
+        subtitle: 'onboarding.communicationSubtitle',
+    },
+    {
+        title: 'onboarding.textToSpeechTitle',
+        subtitle: 'onboarding.textToSpeechSubtitle',
+    },
+];
 
 export const log = logger.createLogger({
     levels: {
@@ -23,4 +41,3 @@ export const log = logger.createLogger({
     fixedExtLvlLength: false,
     enabled: true,
 });
-export const onboardingSteps = [];

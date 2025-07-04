@@ -1,5 +1,15 @@
 {
     "translation": {
-        "welcomeMessage": "Welcome to the App!"
+        "login": {
+            "welcomeTo": "Welcome to",
+            "emailPlaceholder": "Enter your email here",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password here",
+            "forgotPassword": "Forgot your password?",
+            "or": "OR",
+            "dontHaveAnAccount": "Don't have an account?",
+            "signUp": "Sign Up",
+            "loginWithGoogle": "Login with Google"
+        }
     }
 }
