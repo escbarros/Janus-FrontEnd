@@ -1,6 +1,9 @@
 import CustomButton from '@/components/CustomButton';
 import InputField from '@/components/TextInput';
 import { images } from '@/constants';
+import { useAuth, useSSO } from '@clerk/clerk-expo';
+import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { Lock, Mail } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +12,43 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 const Login = () => {
     const { t } = useTranslation();
+    const router = useRouter();
+    const { isSignedIn } = useAuth();
+
+    const { startSSOFlow } = useSSO();
+
+    React.useEffect(() => {
+        WebBrowser.maybeCompleteAuthSession();
+
+        WebBrowser.warmUpAsync();
+
+        return () => {
+            WebBrowser.coolDownAsync();
+        };
+    }, []);
+
+    const handleGoogleSignIn = async () => {
+        try {
+            if (isSignedIn) {
+                router.replace('/(root)');
+                return;
+            }
+
+            const { createdSessionId, setActive } = await startSSOFlow({
+                strategy: 'oauth_google',
+            });
+
+            console.log('createdSessionId', createdSessionId);
+
+            if (createdSessionId && setActive) {
+                await setActive!({ session: createdSessionId });
+                router.replace('/(root)');
+            }
+        } catch (err) {
+            console.error('OAuth error', err);
+        }
+    };
+
     return (
         <KeyboardAwareScrollView
             className="flex-1"
@@ -49,7 +89,9 @@ const Login = () => {
                                 icon={Lock}
                                 isPassword
                             />
-                            <TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => router.push('/forgotPassword')}
+                            >
                                 <Text className="text-sm color-emerald-400">
                                     {t('login.forgotPassword')}
                                 </Text>
@@ -58,11 +100,11 @@ const Login = () => {
                         <CustomButton text="Login" mode="primary" />
                     </View>
                     <View className="w-full relative items-center">
-                        <View className="w-2/5 h-[2px] bg-slate-300 absolute top-1/2 left-0" />
+                        <View className="w-2/5 h-[1px] bg-slate-300 absolute top-1/2 left-0" />
                         <Text className="color-white text-xl">
                             {t('login.or')}
                         </Text>
-                        <View className="w-2/5 h-[2px] bg-slate-300 absolute top-1/2 right-0" />
+                        <View className="w-2/5 h-[1px] bg-slate-300 absolute top-1/2 right-0" />
                     </View>
                     <View className="w-full items-center gap-4">
                         <CustomButton
@@ -70,13 +112,19 @@ const Login = () => {
                             mode="secondary"
                             appendIcon="google"
                             iconLibrary="antdesign"
+                            onPress={handleGoogleSignIn}
                         />
-                        <Text className="text-base color-white ">
-                            {t('login.dontHaveAnAccount')}{' '}
-                            <Text className="color-emerald-400">
-                                {t('login.signUp')}
+                        <TouchableOpacity
+                            className="w-full"
+                            onPress={() => router.push('/signup')}
+                        >
+                            <Text className="text-base color-white text-center ">
+                                {t('login.dontHaveAnAccount')}{' '}
+                                <Text className="color-emerald-400">
+                                    {t('login.signUp')}
+                                </Text>
                             </Text>
-                        </Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>

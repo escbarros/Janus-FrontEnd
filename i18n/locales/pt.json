@@ -6,10 +6,23 @@
             "password": "Senha",
             "passwordPlaceholder": "Digite sua senha aqui",
             "forgotPassword": "Esqueceu sua senha?",
-            "or": "OU",
+            "or": "Ou",
             "dontHaveAnAccount": "Ainda não tem uma conta?",
             "signUp": "Registre-se",
             "loginWithGoogle": "Entre com o Google"
+        },
+        "signup": {
+            "createAccount": "Criar uma conta",
+            "createAccountDescription": "Bem-vindo! Por favor, preencha os detalhes abaixo para criar sua conta.",
+            "name": "Nome",
+            "namePlaceholder": "Qual é o seu nome?",
+            "email": "Email",
+            "emailPlaceholder": "Digite seu email aqui",
+            "password": "Senha",
+            "passwordPlaceholder": "Digite sua senha aqui",
+            "register": "Registrar",
+            "alreadyHaveAnAccount": "Já tem uma conta?",
+            "login": "Entrar"
         }
     }
 }
