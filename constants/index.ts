@@ -1,7 +1,11 @@
 import { consoleTransport, logger } from 'react-native-logs';
+import forgotPassword from '../assets/images/forgotPassword.png';
 import logo from '../assets/images/logo.png';
+import mailSent from '../assets/images/mailSent.png';
 export const images = {
     logo,
+    forgotPassword,
+    mailSent,
 };
 export const onboardingSteps = [
     {
