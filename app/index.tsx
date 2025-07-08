@@ -1,14 +1,21 @@
-import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { useAuth } from '@clerk/clerk-expo';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function Index() {
-    const { t } = useTranslation();
+    const { isSignedIn, isLoaded } = useAuth();
 
-    return (
-        <View className="flex-1 justify-center items-center bg-white">
-            <Text className="font-sans font-black text-2xl">
-                {t('welcomeMessage')}
-            </Text>
-        </View>
-    );
+    if (!isLoaded) {
+        return (
+            <View className="flex-1 justify-center items-center bg-black">
+                <ActivityIndicator size="large" color="#34d399" />
+            </View>
+        );
+    }
+
+    if (isSignedIn) {
+        return <Redirect href="/(root)" />;
+    }
+
+    return <Redirect href="/(auth)/login" />;
 }
