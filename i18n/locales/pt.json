@@ -9,7 +9,10 @@
             "or": "Ou",
             "dontHaveAnAccount": "Ainda não tem uma conta?",
             "signUp": "Registre-se",
-            "loginWithGoogle": "Entre com o Google"
+            "loginWithGoogle": "Entre com o Google",
+            "emailRequired": "Email é obrigatório",
+            "emailInvalid": "Por favor, insira um endereço de email válido",
+            "passwordRequired": "Senha é obrigatória"
         },
         "signup": {
             "createAccount": "Criar uma conta",
@@ -22,7 +25,12 @@
             "passwordPlaceholder": "Digite sua senha aqui",
             "register": "Registrar",
             "alreadyHaveAnAccount": "Já tem uma conta?",
-            "login": "Entrar"
+            "login": "Entrar",
+            "nameRequired": "Nome é obrigatório",
+            "emailRequired": "Email é obrigatório",
+            "emailInvalid": "Por favor, insira um endereço de email válido",
+            "passwordRequired": "Senha é obrigatória",
+            "passwordTooShort": "A senha deve ter pelo menos 6 caracteres"
         }
     }
 }

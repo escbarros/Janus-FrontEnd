@@ -9,7 +9,10 @@
             "or": "Ou",
             "dontHaveAnAccount": "Don't have an account?",
             "signUp": "Sign Up",
-            "loginWithGoogle": "Login with Google"
+            "loginWithGoogle": "Login with Google",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email address",
+            "passwordRequired": "Password is required"
         },
         "signup": {
             "createAccount": "Create an account",
@@ -22,7 +25,12 @@
             "passwordPlaceholder": "Enter your password here",
             "register": "Register",
             "alreadyHaveAnAccount": "Already have an account?",
-            "login": "Login"
+            "login": "Login",
+            "nameRequired": "Name is required",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email address",
+            "passwordRequired": "Password is required",
+            "passwordTooShort": "Password must be at least 6 characters"
         }
     }
 }

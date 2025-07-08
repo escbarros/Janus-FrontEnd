@@ -1,9 +1,10 @@
 import CustomButton from '@/components/CustomButton';
+import Message from '@/components/Message';
 import InputField from '@/components/TextInput';
-import { images } from '@/constants';
-import { useAuth, useSSO } from '@clerk/clerk-expo';
+import { images, log } from '@/constants';
+import { useAuthActions } from '@/hooks/useAuthActions';
+import { useLoginForm } from '@/hooks/useLoginForm';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { Lock, Mail } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,39 +14,33 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 const Login = () => {
     const { t } = useTranslation();
     const router = useRouter();
-    const { isSignedIn } = useAuth();
+    const {
+        handleGoogleSignIn,
+        handleEmailLogin,
+        isLoading,
+        message,
+        fieldErrors,
+        clearFieldErrors,
+    } = useAuthActions();
+    const {
+        email,
+        setEmail,
+        password,
+        setPassword,
+        emailError,
+        passwordError,
+        validateForm,
+    } = useLoginForm(fieldErrors);
 
-    const { startSSOFlow } = useSSO();
+    const handleLogin = async () => {
+        log.debug('Login button pressed', { email, password });
 
-    React.useEffect(() => {
-        WebBrowser.maybeCompleteAuthSession();
+        // Clear any previous field errors from auth
+        clearFieldErrors();
 
-        WebBrowser.warmUpAsync();
-
-        return () => {
-            WebBrowser.coolDownAsync();
-        };
-    }, []);
-
-    const handleGoogleSignIn = async () => {
-        try {
-            if (isSignedIn) {
-                router.replace('/(root)/(tabs)');
-                return;
-            }
-
-            const { createdSessionId, setActive } = await startSSOFlow({
-                strategy: 'oauth_google',
-            });
-
-            console.log('createdSessionId', createdSessionId);
-
-            if (createdSessionId && setActive) {
-                await setActive!({ session: createdSessionId });
-                router.replace('/(root)/(tabs)');
-            }
-        } catch (err) {
-            console.error('OAuth error', err);
+        if (validateForm()) {
+            await handleEmailLogin(email, password);
+            // Don't reset form here anymore, let the user try again if needed
         }
     };
 
@@ -76,18 +71,40 @@ const Login = () => {
                         <Text className="text-2xl color-white font-black">
                             Login
                         </Text>
+
+                        {message &&
+                            !fieldErrors.email &&
+                            !fieldErrors.password && (
+                                <Message
+                                    message={message}
+                                    type={
+                                        message.includes('sucesso')
+                                            ? 'success'
+                                            : 'error'
+                                    }
+                                />
+                            )}
+
                         <InputField
                             label="Email"
                             placeholder={t('login.emailPlaceholder')}
                             type="email-address"
                             icon={Mail}
+                            value={email}
+                            onChangeText={(newValue) => setEmail(newValue)}
+                            errorMessage={emailError}
                         />
                         <View className="w-full items-end gap-[5px]">
                             <InputField
+                                value={password}
+                                onChangeText={(newValue) =>
+                                    setPassword(newValue)
+                                }
                                 label={t('login.password')}
                                 placeholder={t('login.passwordPlaceholder')}
                                 icon={Lock}
                                 isPassword
+                                errorMessage={passwordError}
                             />
                             <TouchableOpacity
                                 onPress={() => router.push('/forgotPassword')}
@@ -97,7 +114,11 @@ const Login = () => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                        <CustomButton text="Login" mode="primary" />
+                        <CustomButton
+                            text={isLoading ? 'Carregando...' : 'Login'}
+                            mode="primary"
+                            onPress={handleLogin}
+                        />
                     </View>
                     <View className="w-full relative items-center">
                         <View className="w-2/5 h-[1px] bg-slate-300 absolute top-1/2 left-0" />
@@ -108,7 +129,11 @@ const Login = () => {
                     </View>
                     <View className="w-full items-center gap-4">
                         <CustomButton
-                            text={t('login.loginWithGoogle')}
+                            text={
+                                isLoading
+                                    ? 'Carregando...'
+                                    : t('login.loginWithGoogle')
+                            }
                             mode="secondary"
                             appendIcon="google"
                             iconLibrary="antdesign"

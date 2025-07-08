@@ -1,78 +1,47 @@
 import BackButton from '@/components/BackButton';
 import CustomButton from '@/components/CustomButton';
+import ForgotPasswordBottomSheet from '@/components/ForgotPasswordBottomSheet';
+import Message from '@/components/Message';
 import InputField from '@/components/TextInput';
 import { images } from '@/constants';
-import BottomSheet, {
-    BottomSheetBackdrop,
-    BottomSheetScrollView,
-} from '@gorhom/bottom-sheet';
+import { useForgotPassword } from '@/hooks/useForgotPassword';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';
-import { useRouter } from 'expo-router';
 import { Mail } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Keyboard, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { OtpInput } from 'react-native-otp-entry';
-import { Easing } from 'react-native-reanimated';
 
 export default function ForgotPassword() {
     const { t } = useTranslation();
-    const router = useRouter();
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const {
+        email,
+        setEmail,
+        emailError,
+        isLoading,
+        message,
+        sendResetEmail,
+        verifyResetCode,
+        resendResetEmail,
+    } = useForgotPassword();
 
-    const snapPoints = useMemo(() => {
-        return isKeyboardVisible ? ['90%'] : ['55%'];
-    }, [isKeyboardVisible]);
-
-    useEffect(() => {
-        Keyboard.dismiss();
-        const keyboardDidShowListener = Keyboard.addListener(
-            'keyboardDidShow',
-            () => {
-                setIsKeyboardVisible(true);
-            },
-        );
-
-        const keyboardDidHideListener = Keyboard.addListener(
-            'keyboardDidHide',
-            () => {
-                setIsKeyboardVisible(false);
-            },
-        );
-
-        return () => {
-            keyboardDidShowListener?.remove();
-            keyboardDidHideListener?.remove();
-        };
-    }, []);
-
-    const handleSendEmail = () => {
-        bottomSheetRef.current?.expand();
+    const handleSendEmail = async () => {
+        const success = await sendResetEmail();
+        if (success) {
+            bottomSheetRef.current?.expand();
+        }
     };
 
-    const handleCloseBottomSheet = () => {
-        router.push('/changePassword');
-        Keyboard.dismiss();
-        setTimeout(() => {
-            bottomSheetRef.current?.close();
-        }, 100);
+    const handleVerifyCode = async (code: string) => {
+        await verifyResetCode(code);
+        bottomSheetRef.current?.close();
     };
 
-    const renderBackdrop = useCallback(
-        (props: any) => (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={-1}
-                appearsOnIndex={0}
-                opacity={0.75}
-                style={[props.style, { backgroundColor: '#111827' }]}
-                pressBehavior="close"
-            />
-        ),
-        [],
-    );
+    const handleResendEmail = async () => {
+        await resendResetEmail();
+    };
 
     return (
         <>
@@ -99,13 +68,28 @@ export default function ForgotPassword() {
                                 de senha.
                             </Text>
                         </View>
+
+                        {message && (
+                            <Message
+                                message={message}
+                                type={
+                                    message.includes('sucesso')
+                                        ? 'success'
+                                        : 'error'
+                                }
+                            />
+                        )}
+
                         <InputField
                             label={t('signup.email')}
                             placeholder={t('signup.emailPlaceholder')}
                             icon={Mail}
+                            value={email}
+                            onChangeText={setEmail}
+                            errorMessage={emailError}
                         />
                         <CustomButton
-                            text="Enviar"
+                            text={isLoading ? 'Enviando...' : 'Enviar'}
                             mode="primary"
                             onPress={handleSendEmail}
                         />
@@ -113,63 +97,12 @@ export default function ForgotPassword() {
                 </View>
             </KeyboardAwareScrollView>
             <Portal>
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={-1}
-                    snapPoints={snapPoints}
-                    enablePanDownToClose={false}
-                    enableHandlePanningGesture={false}
-                    enableContentPanningGesture={false}
-                    backdropComponent={renderBackdrop}
-                    backgroundStyle={{ backgroundColor: '#1F2937' }}
-                    keyboardBehavior="interactive"
-                    keyboardBlurBehavior="restore"
-                    enableBlurKeyboardOnGesture
-                    android_keyboardInputMode="adjustResize"
-                    animationConfigs={{
-                        duration: 0,
-                        easing: Easing.linear,
-                    }}
-                >
-                    <BottomSheetScrollView
-                        className="flex-1 p-6"
-                        contentContainerStyle={{ flexGrow: 1 }}
-                    >
-                        <View className="items-center gap-4">
-                            <Image source={images.mailSent} />
-                            <Text className="text-2xl font-bold text-center color-white">
-                                E-mail enviado!
-                            </Text>
-                            <Text className="text-base text-center color-slate-300">
-                                Enviamos um código de redefinição de senha para
-                                o seu e-mail. Verifique sua caixa de entrada e
-                                spam.
-                            </Text>
-                            <OtpInput
-                                numberOfDigits={6}
-                                placeholder="000000"
-                                autoFocus={false}
-                                focusColor={'#34d399'}
-                                onTextChange={(text) => console.log(text)}
-                                theme={{
-                                    filledPinCodeContainerStyle: {
-                                        backgroundColor: '#475569',
-                                        borderColor: '#94A3B8',
-                                    },
-                                    pinCodeTextStyle: { color: 'white' },
-                                }}
-                            />
-                            <CustomButton
-                                text="Verificar"
-                                mode="primary"
-                                onPress={handleCloseBottomSheet}
-                            />
-                            <Text className="w-full text-center color-white underline">
-                                Não recebeu o email? Reenviar
-                            </Text>
-                        </View>
-                    </BottomSheetScrollView>
-                </BottomSheet>
+                <ForgotPasswordBottomSheet
+                    bottomSheetRef={bottomSheetRef}
+                    onVerifyCode={handleVerifyCode}
+                    onResendEmail={handleResendEmail}
+                    email={email}
+                />
             </Portal>
         </>
     );

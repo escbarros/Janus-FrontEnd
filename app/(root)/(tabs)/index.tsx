@@ -52,7 +52,7 @@ const Homepage = () => {
                 <Text className="color-white text-2xl">
                     Olá,{' '}
                     <Text className="font-bold">
-                        {user?.firstName || 'Usuário'}
+                        {user?.firstName?.split(' ')[0] || 'User'}
                     </Text>
                 </Text>
             </View>
