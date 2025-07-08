@@ -30,7 +30,7 @@ const Login = () => {
     const handleGoogleSignIn = async () => {
         try {
             if (isSignedIn) {
-                router.replace('/(root)');
+                router.replace('/(root)/(tabs)');
                 return;
             }
 
@@ -42,7 +42,7 @@ const Login = () => {
 
             if (createdSessionId && setActive) {
                 await setActive!({ session: createdSessionId });
-                router.replace('/(root)');
+                router.replace('/(root)/(tabs)');
             }
         } catch (err) {
             console.error('OAuth error', err);
