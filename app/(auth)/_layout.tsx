@@ -22,6 +22,9 @@ export default function Layout() {
                     }}
                 >
                     <Stack.Screen name="login" />
+                    <Stack.Screen name="signup" />
+                    <Stack.Screen name="forgotPassword" />
+                    <Stack.Screen name="changePassword" />
                 </Stack>
             </SafeAreaProvider>
         </View>

@@ -6,7 +6,7 @@ interface InputFieldProps {
     label: string;
     placeholder: string;
     isPassword?: boolean;
-    icon: LucideIcon;
+    icon?: LucideIcon | undefined;
     type?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
 }
 export default function InputField({
@@ -21,7 +21,9 @@ export default function InputField({
         <View className="gap-1.5 flex-start justify-start w-full">
             <Text className="color-white font-medium text-base">{label}</Text>
             <View className="flex-row gap-2 items-center border-slate-300 border-2 py-3 rounded-xl w-full px-3 relative">
-                <IconComponent color="white" className="absolute" />
+                {IconComponent && (
+                    <IconComponent color="white" className="absolute" />
+                )}
                 <TextInput
                     keyboardType={type}
                     placeholder={placeholder}
