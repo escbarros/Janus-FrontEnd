@@ -33,7 +33,13 @@ const Settings = () => {
                         {user?.fullName}
                     </Text>
                 </View>
-                <Pencil color={'white'} size={16} />
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push('/(root)/(tabs)/(settings)/edit-profile')
+                    }
+                >
+                    <Pencil color={'white'} size={16} />
+                </TouchableOpacity>
             </View>
             <TouchableOpacity
                 className="flex-row items-center gap-3 w-full"
