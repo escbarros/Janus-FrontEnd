@@ -25,7 +25,6 @@ export default function Layout() {
                         contentStyle: {
                             backgroundColor: 'transparent',
                             paddingVertical: 64,
-                            paddingHorizontal: 24,
                         },
                     }}
                 >

@@ -45,7 +45,7 @@ export default function Layout() {
                     position: 'absolute',
                     bottom: 0,
                     width: 250,
-                    marginLeft: (width - 310) / 2, // Não faço ideia
+                    marginLeft: (width - 250) / 2, // Centraliza o tab bar
                     paddingHorizontal: 8,
                     paddingVertical: 6,
                 },
@@ -82,7 +82,7 @@ export default function Layout() {
                 }}
             />
             <Tabs.Screen
-                name="settings"
+                name="(settings)"
                 options={{
                     title: 'Settings',
                     tabBarIcon: ({ color, focused }) => (
