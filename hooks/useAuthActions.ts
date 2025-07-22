@@ -1,12 +1,15 @@
 import { log } from '@/constants';
 import { useAuth, useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
+import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
+import { useUserData } from './useUserData';
 
 export const useAuthActions = () => {
     const { isSignedIn } = useAuth();
     const { startSSOFlow } = useSSO();
+    const { fetchUserData } = useUserData();
     const { signUp, setActive: setActiveSignUp } = useSignUp();
     const { signIn, setActive: setActiveSignIn } = useSignIn();
     const router = useRouter();
@@ -31,19 +34,27 @@ export const useAuthActions = () => {
     const handleGoogleSignIn = async () => {
         try {
             if (isSignedIn) {
+                log.debug('User already signed in, fetching user data');
+                await fetchUserData();
+                log.debug('Redirecting to main app -- 1');
                 router.replace('/(root)/(tabs)');
                 return;
             }
-
+            log.debug('Starting Google SSO flow');
             const { createdSessionId, setActive } = await startSSOFlow({
                 strategy: 'oauth_google',
+                redirectUrl: AuthSession.makeRedirectUri({
+                    path: '/(root)/(tabs)',
+                }),
             });
 
             log.debug('createdSessionId', createdSessionId);
 
             if (createdSessionId && setActive) {
+                log.debug('Setting active session');
+                await fetchUserData();
                 await setActive({ session: createdSessionId });
-                router.replace('/(root)/(tabs)');
+                log.debug('Redirecting to main app -- 2');
             }
         } catch (err) {
             log.error('OAuth error', err);
@@ -72,6 +83,7 @@ export const useAuthActions = () => {
 
             if (result.status === 'complete') {
                 await setActiveSignIn({ session: result.createdSessionId });
+                await fetchUserData();
                 setMessage('Login realizado com sucesso!');
                 router.replace('/(root)/(tabs)');
             } else {
@@ -145,13 +157,14 @@ export const useAuthActions = () => {
                 password: password,
             });
 
-            log.debug('SignUp result:', result);
+            log.debug('SignUp result:', result.status);
+            log.debug('SignUp missing fields:', result.missingFields);
+            log.debug('SignUp unverified fields:', result.unverifiedFields);
 
             await signUp.prepareEmailAddressVerification({
                 strategy: 'email_code',
             });
 
-            log.debug('Email verification prepared');
             setMessage(
                 'Conta criada com sucesso! Verifique seu email para confirmar.',
             );
@@ -231,8 +244,7 @@ export const useAuthActions = () => {
                 code: code,
             });
 
-            log.debug('Email verification result:', result);
-
+            log.debug('Email verification result:', result.status);
             if (result.status === 'complete') {
                 await setActiveSignUp({ session: result.createdSessionId });
                 setMessage('Email verificado com sucesso!');

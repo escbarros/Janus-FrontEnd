@@ -1,9 +1,7 @@
-// Hooks de autenticação
 export { useAuthActions } from './useAuthActions';
+export { useUserData } from './useUserData';
 
-// Hooks de formulários
 export { useLoginForm } from './useLoginForm';
 export { useSignupForm } from './useSignupForm';
 
-// Hooks de recuperação de senha
 export { useForgotPassword } from './useForgotPassword';

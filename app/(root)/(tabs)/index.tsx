@@ -1,66 +1,96 @@
+import HomepageCarrousel from '@/components/HomepageCarrousel';
+import IconButton from '@/components/IconButton';
+import NoDevices from '@/components/NoDevices';
+import { useUserStore } from '@/store';
 import { useUser } from '@clerk/clerk-expo';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { LayoutPanelTop, LucideIcon, Plus } from 'lucide-react-native';
-import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { LayoutPanelTop, Plus } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    Image,
+    RefreshControl,
+    ScrollView,
+    Text,
+    View,
+} from 'react-native';
 
-interface IconButtonProps {
-    mode?: 'primary' | 'secondary';
-    icon: LucideIcon | any;
-    iconLibrary?: 'lucide' | 'antdesign';
+interface Devices {
+    serialNumber: string;
+    name: string;
 }
-const IconButton = ({
-    icon,
-    mode = 'primary',
-    iconLibrary = 'lucide',
-}: IconButtonProps) => {
-    const theme =
-        mode === 'primary'
-            ? 'bg-emerald-500/25 border-[1px] border-emerald-500'
-            : 'transparent';
-    return (
-        <TouchableOpacity
-            className={`h-9 w-9 rounded-full ${theme} justify-center items-center`}
-        >
-            {icon && iconLibrary === 'antdesign' && (
-                <AntDesign name={icon} size={20} color={'#ffffff'} />
-            )}
-            {icon &&
-                iconLibrary === 'lucide' &&
-                React.createElement(icon as LucideIcon, {
-                    size: 20,
-                    color: '#ffffff',
-                })}
-        </TouchableOpacity>
-    );
-};
 
 const Homepage = () => {
-    const { user } = useUser();
+    const { user: clerkUser } = useUser();
+    const { user } = useUserStore();
+    const [refreshing, setRefreshing] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            // TODO: Implementar lógica para recarregar os dados do usuário
+            setRefreshKey((prev) => prev + 1);
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    if (!user) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <ActivityIndicator size="large" color="#34d399" />
+            </View>
+        );
+    }
     return (
-        <View className="w-100 flex-row items-center space-between">
-            <View className="flex-row items-center gap-4 flex-1">
-                {user?.imageUrl ? (
-                    <Image
-                        source={{ uri: user.imageUrl }}
-                        className="h-12 w-12 rounded-full"
-                    />
+        <ScrollView
+            className="w-full h-full"
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="flex-1"
+        >
+            <View className="w-full h-full gap-5 ">
+                <View className="w-100 flex-row items-center space-between px-6">
+                    <View className="flex-row items-center gap-4 flex-1">
+                        {clerkUser?.imageUrl ? (
+                            <Image
+                                source={{ uri: clerkUser.imageUrl }}
+                                className="h-12 w-12 rounded-full"
+                            />
+                        ) : (
+                            <View className="h-12 w-12 rounded-full bg-gray-400" />
+                        )}
+                        <Text className="color-white text-2xl">
+                            Olá,{' '}
+                            <Text className="font-bold">
+                                {user?.name || 'User'}
+                            </Text>
+                        </Text>
+                    </View>
+                    <View className="flex-row items-center gap-4 justify-end">
+                        <IconButton icon={Plus}></IconButton>
+                        <IconButton
+                            mode="secondary"
+                            icon={LayoutPanelTop}
+                        ></IconButton>
+                    </View>
+                </View>
+                {user?.devices.length === 0 ? (
+                    <NoDevices />
                 ) : (
-                    <View className="h-12 w-12 rounded-full bg-gray-400" />
+                    <View className="w-full h-full">
+                        <HomepageCarrousel
+                            items={user?.devices as Devices[]}
+                            refreshKey={refreshKey > 0 ? refreshKey : undefined}
+                        />
+                    </View>
                 )}
-                <Text className="color-white text-2xl">
-                    Olá,{' '}
-                    <Text className="font-bold">
-                        {user?.firstName?.split(' ')[0] || 'User'}
-                    </Text>
-                </Text>
             </View>
-            <View className="flex-row items-center gap-4 justify-end">
-                <IconButton icon={Plus}></IconButton>
-                <IconButton mode="secondary" icon={LayoutPanelTop}></IconButton>
-            </View>
-        </View>
+        </ScrollView>
     );
 };
 

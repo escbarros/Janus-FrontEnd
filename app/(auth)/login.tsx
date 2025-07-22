@@ -35,12 +35,10 @@ const Login = () => {
     const handleLogin = async () => {
         log.debug('Login button pressed', { email, password });
 
-        // Clear any previous field errors from auth
         clearFieldErrors();
 
         if (validateForm()) {
             await handleEmailLogin(email, password);
-            // Don't reset form here anymore, let the user try again if needed
         }
     };
 
