@@ -24,7 +24,7 @@ export default function Layout() {
                         headerShown: false,
                         contentStyle: {
                             backgroundColor: 'transparent',
-                            paddingVertical: 64,
+                            paddingVertical: 0,
                         },
                     }}
                 >

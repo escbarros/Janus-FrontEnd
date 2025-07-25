@@ -2,6 +2,7 @@ import { api } from '@/utils';
 import { useAuth } from '@clerk/clerk-expo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { BatteryFull, Cog, Wifi } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -65,6 +66,13 @@ const HomepageCarrouselItem = ({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshKey]);
+
+    const handleDevicePress = () => {
+        router.push(
+            `/(root)/(tabs)/(home)/device-info?id=${item.serialNumber}`,
+        );
+    };
+
     return (
         <View
             style={{ width: width - 48 }}
@@ -75,7 +83,10 @@ const HomepageCarrouselItem = ({
                     <ActivityIndicator size="large" color="#fff" />
                 </View>
             ) : imageUri ? (
-                <TouchableOpacity className="w-full h-full border-slate-800 border-2 rounded-3xl overflow-hidden relative">
+                <TouchableOpacity
+                    className="w-full h-full border-slate-800 border-2 rounded-3xl overflow-hidden relative"
+                    onPress={handleDevicePress}
+                >
                     <Image
                         key={item.serialNumber}
                         source={{ uri: imageUri }}

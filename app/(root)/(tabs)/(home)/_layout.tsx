@@ -8,15 +8,19 @@ const Layout = () => {
                 headerShown: false,
                 contentStyle: {
                     backgroundColor: 'transparent',
-                    paddingHorizontal: 24,
-                    paddingVertical: 64,
                 },
             }}
         >
             <Stack.Screen
                 name="index"
                 options={{
-                    title: 'Settings',
+                    title: 'Home',
+                }}
+            />
+            <Stack.Screen
+                name="device-info"
+                options={{
+                    title: 'Device Info',
                 }}
             />
         </Stack>

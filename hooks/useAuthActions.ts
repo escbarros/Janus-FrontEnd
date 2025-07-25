@@ -37,14 +37,14 @@ export const useAuthActions = () => {
                 log.debug('User already signed in, fetching user data');
                 await fetchUserData();
                 log.debug('Redirecting to main app -- 1');
-                router.replace('/(root)/(tabs)');
+                router.replace('/(root)/(tabs)/(home)');
                 return;
             }
             log.debug('Starting Google SSO flow');
             const { createdSessionId, setActive } = await startSSOFlow({
                 strategy: 'oauth_google',
                 redirectUrl: AuthSession.makeRedirectUri({
-                    path: '/(root)/(tabs)',
+                    path: '/(root)/(tabs)/(home)',
                 }),
             });
 

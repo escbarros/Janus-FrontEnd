@@ -44,7 +44,6 @@ export const useSignupForm = (authFieldErrors?: {
         clearErrors();
     };
 
-    // Merge validation errors with auth errors (auth errors take precedence)
     const finalNameError = authFieldErrors?.name || nameError;
     const finalEmailError = authFieldErrors?.email || emailError;
     const finalPasswordError = authFieldErrors?.password || passwordError;

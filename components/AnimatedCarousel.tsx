@@ -63,7 +63,6 @@ const AnimatedCarousel = ({ items }: AnimatedCarouselProps) => {
 
     useEffect(() => {
         if (carouselItems.length > 1) {
-            // Posiciona o scroll para começar com o item index === 1 focado
             const itemWidth = width - 48;
             const initialOffset = itemWidth; // Offset para o segundo item (index 1)
 
@@ -72,7 +71,6 @@ const AnimatedCarousel = ({ items }: AnimatedCarouselProps) => {
                     x: initialOffset,
                     animated: false,
                 });
-                // Sincroniza o valor do scrollX
                 scrollX.setValue(initialOffset);
             }, 100);
         }

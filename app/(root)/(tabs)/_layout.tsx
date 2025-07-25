@@ -43,9 +43,9 @@ export default function Layout() {
                     borderRadius: 100,
                     alignItems: 'center',
                     position: 'absolute',
-                    bottom: 0,
+                    bottom: 64,
                     width: 250,
-                    marginLeft: (width - 250) / 2, // Centraliza o tab bar
+                    marginLeft: (width - 250) / 2,
                     paddingHorizontal: 8,
                     paddingVertical: 6,
                 },
@@ -56,7 +56,7 @@ export default function Layout() {
             }}
         >
             <Tabs.Screen
-                name="index"
+                name="(home)"
                 options={{
                     title: 'Home',
                     tabBarIcon: ({ color, focused }) => (
