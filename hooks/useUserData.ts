@@ -11,6 +11,7 @@ export const useUserData = () => {
     const fetchUserData = useCallback(async () => {
         log.debug('Fetching user data');
         if (!isLoaded) {
+            log.warn('Auth is not loaded yet, skipping user data fetch');
             return;
         }
         if (isSignedIn && userId && !user && !isLoading) {

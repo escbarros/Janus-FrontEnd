@@ -5,7 +5,7 @@ import { Text, TouchableOpacity } from 'react-native';
 
 interface CustomButtonProps {
     text: string;
-    mode?: 'primary' | 'secondary';
+    mode?: 'primary' | 'secondary' | 'reject';
     appendIcon?: LucideIcon | any;
     iconLibrary?: 'lucide' | 'antdesign';
     onPress?: () => void;
@@ -21,9 +21,12 @@ export default function CustomButton({
     const containerStyle =
         mode === 'primary'
             ? 'bg-emerald-400'
-            : 'border-emerald-200 border-2 bg-transparent';
+            : mode === 'secondary'
+              ? 'border-emerald-200 border-2 bg-transparent'
+              : 'bg-pink-800';
 
-    const textStyle = mode === 'primary' ? 'color-white' : 'color-emerald-200';
+    const textStyle =
+        mode !== 'secondary' ? 'color-white' : 'color-emerald-200';
 
     return (
         <TouchableOpacity

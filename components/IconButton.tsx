@@ -4,31 +4,38 @@ import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
 interface IconButtonProps {
-    mode?: 'primary' | 'secondary';
+    mode?: 'primary' | 'secondary' | 'tertiary';
+    iconSize?: number;
     icon: LucideIcon | any;
     iconLibrary?: 'lucide' | 'antdesign';
+    onPress?: () => void;
 }
 
 const IconButton = ({
     icon,
+    iconSize = 20,
     mode = 'primary',
     iconLibrary = 'lucide',
+    onPress = () => {},
 }: IconButtonProps) => {
     const theme =
         mode === 'primary'
             ? 'bg-emerald-500/25 border-[1px] border-emerald-500'
-            : 'transparent';
+            : mode === 'secondary'
+              ? 'border-[1px] border-white'
+              : 'transparent';
     return (
         <TouchableOpacity
             className={`h-9 w-9 rounded-full ${theme} justify-center items-center`}
+            onPress={onPress}
         >
             {icon && iconLibrary === 'antdesign' && (
-                <AntDesign name={icon} size={20} color={'#ffffff'} />
+                <AntDesign name={icon} size={iconSize} color={'#ffffff'} />
             )}
             {icon &&
                 iconLibrary === 'lucide' &&
                 React.createElement(icon as LucideIcon, {
-                    size: 20,
+                    size: iconSize,
                     color: '#ffffff',
                 })}
         </TouchableOpacity>

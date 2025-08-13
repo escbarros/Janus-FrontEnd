@@ -1,18 +1,21 @@
 import BackButton from '@/components/BackButton';
-import EventCard from '@/components/EventCard';
 import IconButton from '@/components/IconButton';
 import { useUserStore } from '@/store';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronRight, Pencil } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const DeviceInfo = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
     const { user } = useUserStore();
-    const [device] = useState(() =>
+    const [device, setDevice] = useState(() =>
         user?.devices.find((device) => device.serialNumber === id),
     );
+
+    useEffect(() => {
+        setDevice(user?.devices.find((device) => device.serialNumber === id));
+    }, [user?.devices, id]);
 
     return (
         <ScrollView
@@ -26,7 +29,14 @@ const DeviceInfo = () => {
                     <Text className="color-white text-center text-xl font-extrabold">
                         {device?.name}
                     </Text>
-                    <IconButton icon={Pencil} mode="secondary"></IconButton>
+                    <IconButton
+                        icon={Pencil}
+                        mode="secondary"
+                        iconSize={14}
+                        onPress={() =>
+                            router.push(`/(root)/(tabs)/(home)/teste`)
+                        }
+                    />
                 </View>
                 <View className="w-full h-80 rounded-2xl bg-slate-700"></View>
                 <View className="w-full gap-3">
@@ -39,19 +49,7 @@ const DeviceInfo = () => {
                             <ChevronRight size={14} color="#fff" />
                         </TouchableOpacity>
                     </View>
-                    <View className="gap-1">
-                        <EventCard showDeviceName={false} showBackground />
-                        <EventCard
-                            showDeviceName={false}
-                            showBackground
-                            type="door-locked"
-                        />
-                        <EventCard
-                            showDeviceName={false}
-                            showBackground
-                            type="doorbell"
-                        />
-                    </View>
+                    <View className="gap-1"></View>
                 </View>
             </View>
         </ScrollView>

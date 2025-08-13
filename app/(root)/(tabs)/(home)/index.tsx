@@ -24,7 +24,6 @@ const Homepage = () => {
     const { user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
-
     const onRefresh = async () => {
         setRefreshing(true);
         try {
@@ -75,7 +74,7 @@ const Homepage = () => {
                     <View className="flex-row items-center gap-4 justify-end">
                         <IconButton icon={Plus}></IconButton>
                         <IconButton
-                            mode="secondary"
+                            mode="tertiary"
                             icon={LayoutPanelTop}
                         ></IconButton>
                     </View>

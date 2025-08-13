@@ -1,4 +1,4 @@
-import { api } from '@/utils';
+import { api } from '@/utils/api/index';
 import { useAuth } from '@clerk/clerk-expo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,7 +13,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import AnimatedCarousel from './AnimatedCarousel';
 const width = Dimensions.get('screen').width;
 interface Device {
     serialNumber: string;
@@ -144,7 +143,6 @@ const HomepageCarrousel = ({ items, refreshKey }: HomepageCarrouselProps) => {
                     refreshKey={refreshKey}
                 />
             )}
-            <AnimatedCarousel items={[1, 2, 3]} />
         </View>
     );
 };

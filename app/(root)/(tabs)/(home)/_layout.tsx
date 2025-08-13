@@ -23,6 +23,12 @@ const Layout = () => {
                     title: 'Device Info',
                 }}
             />
+            <Stack.Screen
+                name="teste"
+                options={{
+                    title: 'Device Stream',
+                }}
+            />
         </Stack>
     );
 };
