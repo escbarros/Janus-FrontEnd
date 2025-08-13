@@ -24,7 +24,7 @@ const Layout = () => {
                 }}
             />
             <Stack.Screen
-                name="teste"
+                name="device-stream"
                 options={{
                     title: 'Device Stream',
                 }}

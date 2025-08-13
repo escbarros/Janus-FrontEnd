@@ -34,7 +34,7 @@ const DeviceInfo = () => {
                         mode="secondary"
                         iconSize={14}
                         onPress={() =>
-                            router.push(`/(root)/(tabs)/(home)/teste`)
+                            router.push(`/(root)/(tabs)/(home)/device-stream`)
                         }
                     />
                 </View>

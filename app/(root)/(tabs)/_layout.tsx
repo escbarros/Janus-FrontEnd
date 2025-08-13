@@ -1,8 +1,11 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import { Bell, Home, Settings } from 'lucide-react-native';
 import { Dimensions, View } from 'react-native';
 const { width } = Dimensions.get('screen');
 export default function Layout() {
+    const pathname = usePathname();
+    const isTesteScreen = pathname.includes('device-stream');
+
     const CustomTabIcon = ({
         size = 28,
         icon: Icon,
@@ -36,6 +39,7 @@ export default function Layout() {
                 tabBarActiveTintColor: '#34d399',
                 tabBarInactiveTintColor: '#a7f3d0',
                 tabBarStyle: {
+                    display: isTesteScreen ? 'none' : 'flex',
                     backgroundColor: '#020617',
                     borderTopWidth: 0,
                     elevation: 2,
