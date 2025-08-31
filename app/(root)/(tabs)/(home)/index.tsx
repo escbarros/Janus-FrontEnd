@@ -1,8 +1,10 @@
 import HomepageCarrousel from '@/components/HomepageCarrousel';
 import IconButton from '@/components/IconButton';
 import NoDevices from '@/components/NoDevices';
+import { useAwsIotMqtt } from '@/hooks/useAwsIotMqtt';
 import { useUserStore } from '@/store';
 import { useUser } from '@clerk/clerk-expo';
+
 import { LayoutPanelTop, Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -16,7 +18,7 @@ import {
 
 interface Devices {
     serialNumber: string;
-    name: string;
+    nickname: string;
 }
 
 const Homepage = () => {
@@ -24,6 +26,14 @@ const Homepage = () => {
     const { user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const { signInUser, publishMessage } = useAwsIotMqtt();
+    const handleSignIn = async () => {
+        await signInUser('janusmobileuser', 'Senha@Janus123');
+    };
+
+    const testPublish = () => {
+        publishMessage('janus/test', 'Hello from Janus App!');
+    };
     const onRefresh = async () => {
         setRefreshing(true);
         try {
@@ -67,15 +77,19 @@ const Homepage = () => {
                         <Text className="color-white text-2xl">
                             Olá,{' '}
                             <Text className="font-bold">
-                                {user?.name || 'User'}
+                                {user?.name.split(' ')[0] || 'User'}
                             </Text>
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-4 justify-end">
-                        <IconButton icon={Plus}></IconButton>
+                        <IconButton
+                            icon={Plus}
+                            onPress={handleSignIn}
+                        ></IconButton>
                         <IconButton
                             mode="tertiary"
                             icon={LayoutPanelTop}
+                            onPress={testPublish}
                         ></IconButton>
                     </View>
                 </View>

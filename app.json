@@ -1,6 +1,6 @@
 {
     "expo": {
-        "name": "JanusFrontEnd",
+        "name": "Janus",
         "slug": "JanusFrontEnd",
         "version": "1.0.0",
         "orientation": "portrait",
@@ -15,10 +15,11 @@
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
+                "backgroundColor": "#030712"
             },
             "edgeToEdgeEnabled": true,
             "package": "com.escbarros.janus",
+            "googleServicesFile": "./google-services.json",
             "permissions": ["android.permission.RECORD_AUDIO"]
         },
         "web": {
@@ -63,6 +64,9 @@
                 "projectId": "de9fb1ae-a1ad-49d4-a432-1da4392e0ffc"
             }
         },
-        "owner": "escbarros"
+        "owner": "escbarros",
+        "hooks": {
+            "postClone": "./eas-hooks/post-clone.js"
+        }
     }
 }

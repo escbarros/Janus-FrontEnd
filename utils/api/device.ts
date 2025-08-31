@@ -8,14 +8,14 @@ export const deviceApi = {
     ): Promise<string> {
         try {
             const response = await apiClient.get(
-                `/devices/thumbnail/${serialNumber}/url`,
+                `/device/thumbnail/${serialNumber}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 },
             );
-            return response.data.data.imageUrl;
+            return response.data.url;
         } catch (error: any) {
             log.error('Failed to fetch device thumbnail', error);
             throw error;

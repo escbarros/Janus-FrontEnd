@@ -3,6 +3,7 @@ import forgotPassword from '../assets/images/forgotPassword.png';
 import logo from '../assets/images/logo.png';
 import mailSent from '../assets/images/mailSent.png';
 import noEvents from '../assets/images/no-events.png';
+import noRecordings from '../assets/images/no-recordings.png';
 import noDeviceArrow from '../assets/images/noDeviceArrow.png';
 export const images = {
     logo,
@@ -10,6 +11,7 @@ export const images = {
     mailSent,
     noDeviceArrow,
     noEvents,
+    noRecordings,
 };
 export const onboardingSteps = [
     {

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface InputFieldProps {
-    label: string;
+    label?: string;
     placeholder: string;
     isPassword?: boolean;
     icon?: LucideIcon | undefined;
@@ -13,7 +13,7 @@ interface InputFieldProps {
     onChangeText: (text: string) => void;
 }
 export default function InputField({
-    label,
+    label = '',
     placeholder,
     isPassword = false,
     icon: IconComponent,

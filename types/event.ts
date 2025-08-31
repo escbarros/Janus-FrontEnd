@@ -7,7 +7,7 @@ export interface Event {
     readAt: Date | null;
     device?: {
         serialNumber: string;
-        name: string;
+        nickname: string;
     };
 }
 

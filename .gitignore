@@ -38,3 +38,4 @@ yarn-error.*
 
 app-example
 .vscode/terminals.json
+google-services.json

@@ -1,7 +1,10 @@
 import axios from 'axios';
+import * as Device from 'expo-device';
 
 export const API_BASE_URL = __DEV__
-    ? 'http://192.168.0.107:3000'
+    ? Device.isDevice
+        ? 'http://192.168.0.117:3000/api/v1'
+        : 'http://10.0.2.2:3000/api/v1'
     : 'https://your-production-api.com';
 
 export const apiClient = axios.create({

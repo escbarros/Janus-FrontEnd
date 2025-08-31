@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import * as Haptics from 'expo-haptics';
 import { LucideIcon } from 'lucide-react-native';
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
@@ -16,7 +17,7 @@ const IconButton = ({
     iconSize = 20,
     mode = 'primary',
     iconLibrary = 'lucide',
-    onPress = () => {},
+    onPress = undefined,
 }: IconButtonProps) => {
     const theme =
         mode === 'primary'
@@ -24,10 +25,16 @@ const IconButton = ({
             : mode === 'secondary'
               ? 'border-[1px] border-white'
               : 'transparent';
+    const beforeOnPress = () => {
+        if (onPress) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onPress();
+        }
+    };
     return (
         <TouchableOpacity
             className={`h-9 w-9 rounded-full ${theme} justify-center items-center`}
-            onPress={onPress}
+            onPress={beforeOnPress}
         >
             {icon && iconLibrary === 'antdesign' && (
                 <AntDesign name={icon} size={iconSize} color={'#ffffff'} />

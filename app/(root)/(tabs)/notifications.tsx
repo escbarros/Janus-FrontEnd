@@ -1,6 +1,6 @@
 import EventCard from '@/components/EventCard';
 import IconButton from '@/components/IconButton';
-import { images } from '@/constants';
+import { images, log } from '@/constants';
 import { useUserStore } from '@/store';
 import { EventResponse } from '@/types/event';
 import { api } from '@/utils/api/index';
@@ -25,9 +25,9 @@ const Notifications = () => {
     const { userId, getToken, isSignedIn } = useAuth();
     const { user } = useUserStore();
 
-    const markEventAsRead = async (eventId: string) => {
+    const markEventAsRead = async (eventId: string, token: string) => {
         try {
-            await api.markEventAsRead(eventId);
+            await api.markEventAsRead(eventId, token);
             setTimeout(() => {
                 setEvents((prevEvents) =>
                     prevEvents.map((event) =>
@@ -58,15 +58,17 @@ const Notifications = () => {
             const token = await getToken();
             if (token) {
                 const userEvents = await api.getUserEvents(user.id, token);
-                console.log(userEvents);
                 const unReadEvents = userEvents
                     .filter((event) => event.readAt === null)
                     .map((event) => event.id);
-                unReadEvents.forEach(markEventAsRead);
+
+                unReadEvents.forEach((eventId) =>
+                    markEventAsRead(eventId, token),
+                );
                 setEvents(userEvents);
             }
         } catch (err) {
-            console.error('Error fetching events:', err);
+            log.error('Error fetching events:', err);
             setError(
                 err instanceof Error ? err.message : 'Failed to fetch events',
             );
@@ -78,7 +80,7 @@ const Notifications = () => {
         try {
             await fetchEvents();
         } catch (error) {
-            console.error('Error refreshing events:', error);
+            log.error('Error refreshing events:', error);
         } finally {
             setRefreshing(false);
         }
@@ -102,7 +104,7 @@ const Notifications = () => {
                 type={item.type || 'DOORBELL'}
                 datetime={item.timestamp}
                 deviceId={item.device?.serialNumber}
-                deviceName={item.device?.name}
+                deviceName={item.device?.nickname}
                 showDeviceName
                 showBackground={item.readAt === null}
                 isNewNotification={item.readAt === null}

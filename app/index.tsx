@@ -1,7 +1,9 @@
 import { useUserData } from '@/hooks';
 import { useAuth } from '@clerk/clerk-expo';
+// import { Buffer } from 'buffer';
 import { Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
+// global.Buffer = Buffer;
 
 export default function Index() {
     const { isSignedIn, isLoaded } = useAuth();

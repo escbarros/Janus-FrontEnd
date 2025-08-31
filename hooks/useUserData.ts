@@ -1,4 +1,5 @@
 import { log } from '@/constants';
+import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@clerk/clerk-expo';
 import { useCallback, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
@@ -8,8 +9,10 @@ export const useUserData = () => {
     const { userId, isSignedIn, getToken, isLoaded } = useAuth();
     const { user, isLoading, error, setUser, setLoading, setError, clearUser } =
         useUserStore();
+    const { expoPushToken } = useNotification();
     const fetchUserData = useCallback(async () => {
         log.debug('Fetching user data');
+        log.warn('Expo push token: ', expoPushToken);
         if (!isLoaded) {
             log.warn('Auth is not loaded yet, skipping user data fetch');
             return;

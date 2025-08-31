@@ -1,7 +1,14 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Lock, PhoneOff } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
+import {
+    ChevronLeft,
+    Cog,
+    Lock,
+    PhoneOff,
+    SendHorizonal,
+} from 'lucide-react-native';
 import { PiCamera } from 'picamera-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -23,7 +30,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaStream, RTCView } from 'react-native-webrtc';
 
 const { height } = Dimensions.get('window');
-
 export default function Teste() {
     const rtcViewRef = useRef(null);
     const piCameraRef = useRef<PiCamera | null>(null);
@@ -85,7 +91,7 @@ export default function Teste() {
         const heightInterpolated = interpolate(
             tranzincY.value,
             [0, height * 0.2],
-            [height * (4.5 / 6), height * (2 / 6)],
+            [height * (5 / 6), height * (2 / 6)],
             Extrapolation.CLAMP,
         );
         return {
@@ -105,8 +111,26 @@ export default function Teste() {
         };
     });
 
+    const blackBarStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(
+            tranzincY.value,
+            [0, height * 0.3],
+            [0, 1],
+            Extrapolation.CLAMP,
+        );
+        return {
+            opacity,
+            height: 64,
+            backgroundColor: '#020617',
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+        };
+    });
+
     return (
-        <SafeAreaView className="flex-1 justify-start items-start px-2">
+        <SafeAreaView className="flex-1 justify-start items-start px-0 w-full">
+            <Animated.View style={blackBarStyle} />
             <Animated.ScrollView
                 className="w-full"
                 onScroll={handleScroll}
@@ -121,7 +145,7 @@ export default function Teste() {
                     style={[padTopStyle]}
                 >
                     <Animated.View
-                        className="w-full bg-slate-800 rounded-2xl overflow-hidden relative items-start justify-start"
+                        className="w-full bg-slate-800 rounded-2xl rounded-tl-none rounded-tr-none overflow-hidden relative items-start justify-start"
                         style={[animatedStyle]}
                     >
                         {remoteStream && (
@@ -133,19 +157,24 @@ export default function Teste() {
                                 style={{ width: '100%', height: '100%' }}
                             />
                         )}
-                        <TouchableOpacity className="h-10 w-10 bg-zinc-800/75 flex justify-center items-center border-[1px] border-zinc-400 rounded-full absolute top-10 left-5">
-                            <Ionicons
-                                name="arrow-back"
-                                size={18}
-                                color="#94a3b8"
-                            />
+                        <TouchableOpacity
+                            onPress={router.back}
+                            className="h-10 w-10 bg-zinc-800/75 flex justify-center items-center border-[1px] border-zinc-400 rounded-full absolute top-10 left-5"
+                        >
+                            <ChevronLeft color={'#94a3b8'} size={18} />
                         </TouchableOpacity>
-                        <TouchableOpacity className="h-10 w-10 bg-zinc-800/75 flex justify-center items-center border-[1px] border-zinc-400 rounded-full absolute top-10 right-5">
-                            <MaterialCommunityIcons
-                                name="dots-horizontal"
-                                size={18}
-                                color="#94a3b8"
-                            />
+                        <TouchableOpacity
+                            onPress={() => {
+                                Haptics.impactAsync(
+                                    Haptics.ImpactFeedbackStyle.Light,
+                                );
+                                router.push(
+                                    '/(root)/(tabs)/(home)/device-info',
+                                );
+                            }}
+                            className="h-10 w-10 bg-zinc-800/75 flex justify-center items-center border-[1px] border-zinc-400 rounded-full absolute top-10 right-5"
+                        >
+                            <Cog size={18} color="#94a3b8" />
                         </TouchableOpacity>
                         <View className="absolute bottom-10 left-5 flex-row items-center">
                             <View className="p-2 bg-zinc-400 rounded-md rounded-tr-none rounded-br-none">
@@ -164,7 +193,7 @@ export default function Teste() {
                     </Animated.View>
                     {/* Controls */}
                     <View
-                        className="flex-col justify-start items-center w-full py-4"
+                        className="flex-col justify-start items-center w-full py-4 px-2"
                         style={{ height: height * (1 / 6) }}
                     >
                         <View className="w-1/3 h-[5px] bg-zinc-200 rounded-full" />
@@ -175,8 +204,13 @@ export default function Teste() {
                                 <Lock color={'white'} />
                             </TouchableOpacity>
                             <TouchableOpacity
-                                className="justify-center items-center rounded-full bg-emerald-400 h-16 w-16"
-                                onPress={() => setIsMicActive(!isMicActive)}
+                                className={`${isMicActive ? 'bg-emerald-400' : 'bg-red-400'} justify-center items-center rounded-full h-16 w-16`}
+                                onPress={() => {
+                                    Haptics.impactAsync(
+                                        Haptics.ImpactFeedbackStyle.Light,
+                                    );
+                                    setIsMicActive(!isMicActive);
+                                }}
                             >
                                 <FontAwesome
                                     name={
@@ -188,32 +222,29 @@ export default function Teste() {
                                     color="black"
                                 />
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                className="justify-center items-center rounded-full bg-slate-700 h-16 w-16"
-                                onPress={endCall}
-                            >
+                            <TouchableOpacity className="justify-center items-center rounded-full bg-slate-700 h-16 w-16">
                                 <PhoneOff color={'white'} />
                             </TouchableOpacity>
                         </View>
                     </View>
                 </Animated.View>
                 <View
-                    className="w-full flex-col justify-start items-start relative"
+                    className="w-full flex-col justify-start items-start relative "
                     style={{ height: height * 0.5 }}
                 >
                     <View className="w-full px-2 h-4/6 gap-y-8 relative">
                         <View className="w-full">
-                            <Text className="color-indigo-300 text-2xl font-black">
+                            <Text className="color-white text-2xl font-black">
                                 Transcrição
                             </Text>
                             <View className="w-full flex-row justify-start items-center gap-x-2">
-                                <Text className="color-indigo-100 text-base font-light">
+                                <Text className="color-slate-300 text-base font-light">
                                     Abaixo estará a transcrição feita por IA
                                 </Text>
                                 <Ionicons
                                     name="sparkles"
                                     size={12}
-                                    color="#e0e7ff"
+                                    color="#cbd5e1"
                                     className="mr-2"
                                 />
                             </View>
@@ -233,18 +264,15 @@ export default function Teste() {
                             </ScrollView>
                         </View>
                     </View>
-                    <View className="absolute bottom-0 w-full h-16 items-center justify-start p-2 pt-4 flex-row gap-x-2">
+                    <View className="bg-slate-950 absolute r-0 l-0 bottom-0 w-full h-16 items-center justify-between p-2 pt-4 flex-row gap-x-2">
                         <TextInput
-                            className="w-5/6 h-full bg-indigo-500/10 border border-indigo-300 rounded-md px-2 color-zinc-100"
-                            placeholder="Digite uma mensagem"
-                            placeholderTextColor="#e0e7ff"
+                            className=" w-5/6 h-full bg-[#020617]/10 border border-slate-300 rounded-md px-2 color-zinc-100"
+                            placeholder="O que você quer falar?"
+                            placeholderClassName="font-bold"
+                            placeholderTextColor="#cbd5e1"
                         />
-                        <TouchableOpacity className="bg-indigo-300 w-1/6 h-full rounded-xl justify-center items-center">
-                            <Ionicons
-                                name="paper-plane"
-                                size={16}
-                                color="white"
-                            />
+                        <TouchableOpacity className="bg-emerald-600 w-8 h-full rounded-lg justify-center items-center p-6 py-0">
+                            <SendHorizonal size={16} color="white" />
                         </TouchableOpacity>
                     </View>
                 </View>

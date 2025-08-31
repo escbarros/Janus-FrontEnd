@@ -9,7 +9,7 @@ export const eventApi = {
     ): Promise<EventResponse[]> {
         console.log('Fetching user events for userId:', userId);
         try {
-            const response = await apiClient.get(`/events/user/${userId}`, {
+            const response = await apiClient.get(`/events/user`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -23,22 +23,26 @@ export const eventApi = {
 
     async getEventImage(id: string, token: string): Promise<string> {
         try {
-            const response = await apiClient.get(`/events/${id}/url`, {
+            const response = await apiClient.get(`/events/thumbnail/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data.data.imageUrl;
+            return response.data.url;
         } catch (error: any) {
             log.error('Failed to fetch event image', error);
             throw error;
         }
     },
 
-    async markEventAsRead(eventId: string) {
+    async markEventAsRead(eventId: string, token: string) {
         try {
-            const response = await apiClient.patch(`/events/${eventId}/read`);
-            return response.data;
+            const response = await apiClient.patch(`/events/${eventId}/read`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response;
         } catch (error: any) {
             log.error('Failed to mark event as read', error);
             throw error;

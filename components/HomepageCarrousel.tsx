@@ -1,4 +1,4 @@
-import { api } from '@/utils/api/index';
+import { useDeviceStore } from '@/store/deviceStore';
 import { useAuth } from '@clerk/clerk-expo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,7 +16,7 @@ import {
 const width = Dimensions.get('screen').width;
 interface Device {
     serialNumber: string;
-    name: string;
+    nickname: string;
 }
 
 interface HomepageCarrouselProps {
@@ -32,36 +32,32 @@ const HomepageCarrouselItem = ({
     refreshKey?: number;
 }) => {
     const { getToken } = useAuth();
-    const [imageUri, setImageUri] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
+    const { fetchThumbnail, getThumbnail } = useDeviceStore();
+    const imageUri = getThumbnail(item.serialNumber);
 
-    const fetchThumbnail = useCallback(async () => {
+    const loadThumbnail = useCallback(async () => {
         try {
             setIsLoading(true);
-            setImageUri('');
             const token = await getToken();
             if (token) {
-                const thumbnailUri = await api.getDeviceThumbnail(
-                    item.serialNumber,
-                    token,
-                );
-                setImageUri(thumbnailUri);
+                await fetchThumbnail(item.serialNumber, token);
             }
         } catch (error) {
             console.error('Error fetching device thumbnail:', error);
         } finally {
             setIsLoading(false);
         }
-    }, [item.serialNumber, getToken]);
+    }, [item.serialNumber, getToken, fetchThumbnail]);
 
     useEffect(() => {
-        fetchThumbnail();
+        loadThumbnail();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (refreshKey && refreshKey > 0) {
-            fetchThumbnail();
+            loadThumbnail();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshKey]);
@@ -108,7 +104,7 @@ const HomepageCarrouselItem = ({
                                 </View>
                                 <View className="items-start justify-between">
                                     <Text className="text-white font-bold text-lg">
-                                        {item.name}
+                                        {item.nickname}
                                     </Text>
                                     <View className="flex-row gap-1 items-start">
                                         <BatteryFull
@@ -135,6 +131,7 @@ const HomepageCarrouselItem = ({
 };
 
 const HomepageCarrousel = ({ items, refreshKey }: HomepageCarrouselProps) => {
+    console.log(items[0]);
     return (
         <View className="w-100 items-center justify-center gap-3">
             {items.length > 0 && (

@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
@@ -6,6 +7,7 @@ import { TouchableOpacity } from 'react-native';
 const BackButton = () => {
     const router = useRouter();
     const onPress = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.back();
     };
     return (
