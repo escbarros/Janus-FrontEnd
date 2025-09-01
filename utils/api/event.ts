@@ -35,13 +35,13 @@ export const eventApi = {
         }
     },
 
-    async markEventAsRead(eventId: string, token: string) {
+    async markEventAsRead(eventId: string) {
+        console.log('Marking event as read:', eventId);
         try {
-            const response = await apiClient.patch(`/events/${eventId}/read`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await apiClient.patch(
+                `/events/${eventId}/read`,
+                {},
+            );
             return response;
         } catch (error: any) {
             log.error('Failed to mark event as read', error);

@@ -1,3 +1,5 @@
+import { useMqtt } from '@/context/MqttContext';
+import { useUser } from '@clerk/clerk-expo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
@@ -8,10 +10,12 @@ import {
     Lock,
     PhoneOff,
     SendHorizonal,
+    Unlock,
 } from 'lucide-react-native';
 import { PiCamera } from 'picamera-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Dimensions,
     Text,
     TextInput,
@@ -30,14 +34,31 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaStream, RTCView } from 'react-native-webrtc';
 
 const { height } = Dimensions.get('window');
-export default function Teste() {
+
+export default function DeviceStream() {
     const rtcViewRef = useRef(null);
     const piCameraRef = useRef<PiCamera | null>(null);
+    const { publishMessage, subscribe } = useMqtt();
+    const { user } = useUser();
     const [remoteStream, setRemoteStream] = useState<MediaStream>();
+    const [isLoadingCommand, setIsLoadingCommand] = useState(false);
+    const [lockState, setLockState] = useState<'locked' | 'unlocked'>(
+        'unlocked',
+    );
     const [peerStatus, setPeerStatus] =
         useState<RTCPeerConnectionState>('closed');
+
     useEffect(() => {
         startCall();
+        subscribe(
+            'device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f',
+            (message) => {
+                setIsLoadingCommand(false);
+                const payload = JSON.parse(message);
+                const { state } = payload;
+                setLockState(state);
+            },
+        );
         return endCall;
     }, []);
 
@@ -57,7 +78,6 @@ export default function Teste() {
 
         client.onTimeout = endCall;
         client.onStream = setRemoteStream;
-        client.onSnapshot = handleImage;
         client.onConnectionState = setPeerStatus;
         client.connect();
 
@@ -69,11 +89,6 @@ export default function Teste() {
             piCameraRef.current.terminate();
             piCameraRef.current = null;
         }
-    };
-
-    const handleImage = (base64: string) => {
-        // receive a base64 image to do something
-        console.log('Image received', base64);
     };
 
     const [isMicActive, setIsMicActive] = useState(true);
@@ -127,6 +142,20 @@ export default function Teste() {
             width: '100%',
         };
     });
+
+    const handleToggleLock = () => {
+        if (isLoadingCommand) return;
+        const topic = lockState === 'locked' ? 'unlock' : 'lock';
+        setIsLoadingCommand(true);
+        publishMessage(
+            `device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f/command/${topic}`,
+            JSON.stringify({
+                userId: user?.id || 'unknown',
+                state: topic,
+                datetime: new Date().toISOString(),
+            }),
+        );
+    };
 
     return (
         <SafeAreaView className="flex-1 justify-start items-start px-0 w-full">
@@ -199,9 +228,16 @@ export default function Teste() {
                         <View className="w-1/3 h-[5px] bg-zinc-200 rounded-full" />
                         <View className="flex-1 w-full h-1/6 flex-row justify-evenly items-center">
                             <TouchableOpacity
+                                onPress={handleToggleLock}
                                 className={`justify-center items-center rounded-full h-16 w-16 border-2 ${getStyle()}`}
                             >
-                                <Lock color={'white'} />
+                                {isLoadingCommand ? (
+                                    <ActivityIndicator color="white" />
+                                ) : lockState === 'locked' ? (
+                                    <Unlock color={'white'} />
+                                ) : (
+                                    <Lock color={'white'} />
+                                )}
                             </TouchableOpacity>
                             <TouchableOpacity
                                 className={`${isMicActive ? 'bg-emerald-400' : 'bg-red-400'} justify-center items-center rounded-full h-16 w-16`}

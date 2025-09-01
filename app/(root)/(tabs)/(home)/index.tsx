@@ -1,10 +1,12 @@
 import HomepageCarrousel from '@/components/HomepageCarrousel';
 import IconButton from '@/components/IconButton';
 import NoDevices from '@/components/NoDevices';
-import { useAwsIotMqtt } from '@/hooks/useAwsIotMqtt';
+import { log } from '@/constants';
+import { useNotification } from '@/context/NotificationContext';
 import { useUserStore } from '@/store';
 import { useUser } from '@clerk/clerk-expo';
-
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 import { LayoutPanelTop, Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -26,18 +28,20 @@ const Homepage = () => {
     const { user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
-    const { signInUser, publishMessage } = useAwsIotMqtt();
-    const handleSignIn = async () => {
-        await signInUser('janusmobileuser', 'Senha@Janus123');
-    };
+    const { expoPushToken } = useNotification();
 
-    const testPublish = () => {
-        publishMessage('janus/test', 'Hello from Janus App!');
-    };
     const onRefresh = async () => {
+        log.debug('Refreshing data', expoPushToken);
+
+        const projectId =
+            Constants?.expoConfig?.extra?.eas?.projectId ??
+            Constants?.easConfig?.projectId;
+        const pushTokenString = (
+            await Notifications.getExpoPushTokenAsync({ projectId })
+        ).data;
+        console.log(pushTokenString);
         setRefreshing(true);
         try {
-            // TODO: Implementar lógica para recarregar os dados do usuário
             setRefreshKey((prev) => prev + 1);
         } catch (error) {
             console.error('Error refreshing data:', error);
@@ -82,14 +86,10 @@ const Homepage = () => {
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-4 justify-end">
-                        <IconButton
-                            icon={Plus}
-                            onPress={handleSignIn}
-                        ></IconButton>
+                        <IconButton icon={Plus}></IconButton>
                         <IconButton
                             mode="tertiary"
                             icon={LayoutPanelTop}
-                            onPress={testPublish}
                         ></IconButton>
                     </View>
                 </View>

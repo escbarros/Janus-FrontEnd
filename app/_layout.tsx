@@ -11,13 +11,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../global.css';
 import '../i18n';
 
+import { MqttProvider } from '@/context/MqttContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import * as Notifications from 'expo-notifications';
 SplashScreen.preventAutoHideAsync();
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: false, // mostra a notificação na tela mesmo se tiver aberto
+        shouldShowAlert: false,
         shouldPlaySound: true,
         shouldSetBadge: false,
         shouldShowBanner: false,
@@ -55,11 +56,13 @@ export default function RootLayout() {
             <GestureHandlerRootView className="flex-1">
                 <PortalProvider>
                     <NotificationProvider>
-                        <Stack screenOptions={{ headerShown: false }}>
-                            <Stack.Screen name="index" />
-                            <Stack.Screen name="(auth)" />
-                            <Stack.Screen name="(root)" />
-                        </Stack>
+                        <MqttProvider>
+                            <Stack screenOptions={{ headerShown: false }}>
+                                <Stack.Screen name="index" />
+                                <Stack.Screen name="(auth)" />
+                                <Stack.Screen name="(root)" />
+                            </Stack>
+                        </MqttProvider>
                     </NotificationProvider>
                     <StatusBar barStyle={'light-content'} />
                 </PortalProvider>

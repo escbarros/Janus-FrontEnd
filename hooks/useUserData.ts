@@ -12,7 +12,7 @@ export const useUserData = () => {
     const { expoPushToken } = useNotification();
     const fetchUserData = useCallback(async () => {
         log.debug('Fetching user data');
-        log.warn('Expo push token: ', expoPushToken);
+        log.error('Expo push token: ', expoPushToken);
         if (!isLoaded) {
             log.warn('Auth is not loaded yet, skipping user data fetch');
             return;

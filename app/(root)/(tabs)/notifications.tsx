@@ -25,9 +25,9 @@ const Notifications = () => {
     const { userId, getToken, isSignedIn } = useAuth();
     const { user } = useUserStore();
 
-    const markEventAsRead = async (eventId: string, token: string) => {
+    const markEventAsRead = async (eventId: string) => {
         try {
-            await api.markEventAsRead(eventId, token);
+            await api.markEventAsRead(eventId);
             setTimeout(() => {
                 setEvents((prevEvents) =>
                     prevEvents.map((event) =>
@@ -62,9 +62,7 @@ const Notifications = () => {
                     .filter((event) => event.readAt === null)
                     .map((event) => event.id);
 
-                unReadEvents.forEach((eventId) =>
-                    markEventAsRead(eventId, token),
-                );
+                unReadEvents.forEach((eventId) => markEventAsRead(eventId));
                 setEvents(userEvents);
             }
         } catch (err) {

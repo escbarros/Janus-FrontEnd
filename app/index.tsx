@@ -1,13 +1,22 @@
+import { useMqtt } from '@/context/MqttContext';
 import { useUserData } from '@/hooks';
 import { useAuth } from '@clerk/clerk-expo';
-// import { Buffer } from 'buffer';
 import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-// global.Buffer = Buffer;
 
 export default function Index() {
     const { isSignedIn, isLoaded } = useAuth();
     const { isLoading: isLoadingUserData } = useUserData();
+    const { connect, disconnect } = useMqtt();
+
+    useEffect(() => {
+        if (isSignedIn) {
+            connect('usuario', 'Senha@123');
+        } else {
+            disconnect();
+        }
+    }, [isSignedIn]);
 
     if (!isLoaded || (isSignedIn && isLoadingUserData)) {
         return (
