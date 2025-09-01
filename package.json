@@ -14,9 +14,6 @@
     "test": "jest --watchAll"
   },
   "dependencies": {
-    "@aws-amplify/react-native": "^1.1.10",
-    "@aws-sdk/protocol-http": "^3.370.0",
-    "@aws-sdk/signature-v4": "^3.370.0",
     "@clerk/clerk-expo": "^2.14.2",
     "@config-plugins/react-native-webrtc": "^12.0.0",
     "@expo/vector-icons": "^14.1.0",
@@ -27,8 +24,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
-    "aws-amplify": "^6.15.5",
-    "aws-iot-device-sdk-v2": "^1.23.0",
+    "@types/paho-mqtt": "^1.0.10",
     "axios": "^1.10.0",
     "buffer": "^6.0.3",
     "expo": "~53.0.17",
