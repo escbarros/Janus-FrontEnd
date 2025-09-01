@@ -32,14 +32,14 @@ export interface EventCardProps {
 }
 
 const EVENT_CONFIG = {
-    'door-unlocked': {
+    DOOR_UNLOCKED: {
         color: 'bg-green-600',
         bgColor: 'bg-green-600/25',
         icon: <DoorOpen size={24} color="#fff" />,
         text: 'Porta destrancada',
         openBottomSheet: false,
     },
-    'door-locked': {
+    DOOR_LOCKED: {
         color: 'bg-violet-700',
         bgColor: 'bg-violet-700/25',
         icon: <DoorClosedLocked size={24} color="#fff" />,
@@ -67,14 +67,14 @@ const EVENT_CONFIG = {
         text: 'Convite enviado',
         openBottomSheet: false,
     },
-    'invite-accepted': {
+    INVITE_ACCEPTED: {
         color: 'bg-teal-500',
         bgColor: 'bg-teal-500/25',
         icon: <UserPlus size={24} color="#fff" />,
         text: 'Convite aceito',
         openBottomSheet: false,
     },
-    'link-invite': {
+    LINK_INVITE: {
         color: 'bg-pink-500',
         bgColor: 'bg-pink-500/25',
         icon: <Link size={24} color="#fff" />,
@@ -85,7 +85,7 @@ const EVENT_CONFIG = {
 
 const EventCard = ({
     id,
-    type = 'door-unlocked',
+    type = 'DOOR_UNLOCKED',
     datetime = Date.now().toString(),
     deviceName,
     deviceId,

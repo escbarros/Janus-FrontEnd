@@ -16,10 +16,10 @@ export interface EventResponse extends Omit<Event, 'timestamp'> {
 }
 
 export type EventType =
-    | 'door-locked'
-    | 'door-unlocked'
+    | 'DOOR_LOCKED'
+    | 'DOOR_UNLOCKED'
     | 'DOORBELL'
     | 'INVITE_SENT'
     | 'INVITE_RECEIVED'
-    | 'invite-accepted'
-    | 'link-invite';
+    | 'INVITE_ACCEPTED'
+    | 'LINK_INVITE';
