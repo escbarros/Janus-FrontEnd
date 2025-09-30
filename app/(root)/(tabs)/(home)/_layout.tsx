@@ -29,6 +29,12 @@ const Layout = () => {
                     title: 'Device Stream',
                 }}
             />
+            <Stack.Screen
+                name="(call)"
+                options={{
+                    title: 'Call',
+                }}
+            />
         </Stack>
     );
 };

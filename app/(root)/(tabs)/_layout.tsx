@@ -4,7 +4,10 @@ import { Dimensions, View } from 'react-native';
 const { width } = Dimensions.get('screen');
 export default function Layout() {
     const pathname = usePathname();
-    const isTesteScreen = pathname.includes('device-stream');
+    const hideNavScreen =
+        pathname.includes('device-stream') ||
+        pathname.includes('(call)') ||
+        /^\/c[a-zA-Z0-9]+$/.test(pathname);
 
     const CustomTabIcon = ({
         size = 28,
@@ -39,7 +42,7 @@ export default function Layout() {
                 tabBarActiveTintColor: '#34d399',
                 tabBarInactiveTintColor: '#a7f3d0',
                 tabBarStyle: {
-                    display: isTesteScreen ? 'none' : 'flex',
+                    display: hideNavScreen ? 'none' : 'flex',
                     backgroundColor: '#020617',
                     borderTopWidth: 0,
                     elevation: 2,

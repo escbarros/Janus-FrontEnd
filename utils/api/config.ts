@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 
 export const API_BASE_URL = __DEV__
     ? Device.isDevice
-        ? 'http://192.168.0.117:3000/api/v1'
+        ? 'http://192.168.0.109:3000/api/v1'
         : 'http://10.0.2.2:3000/api/v1'
     : 'https://your-production-api.com';
 

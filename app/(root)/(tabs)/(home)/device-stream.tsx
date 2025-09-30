@@ -1,15 +1,17 @@
+import StreamChat from '@/components/StreamChat';
+import { log } from '@/constants';
 import { useMqtt } from '@/context/MqttContext';
-import { useUser } from '@clerk/clerk-expo';
+import { api } from '@/utils/api';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import {
     ChevronLeft,
     Cog,
     Lock,
+    PhoneIcon,
     PhoneOff,
-    SendHorizonal,
     Unlock,
 } from 'lucide-react-native';
 import { PiCamera } from 'picamera-react-native';
@@ -18,11 +20,9 @@ import {
     ActivityIndicator,
     Dimensions,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
 import Animated, {
     Extrapolation,
     interpolate,
@@ -37,32 +37,76 @@ const { height } = Dimensions.get('window');
 
 export default function DeviceStream() {
     const rtcViewRef = useRef(null);
+    const scrollViewRef = useRef<Animated.ScrollView>(null);
+
     const piCameraRef = useRef<PiCamera | null>(null);
-    const { publishMessage, subscribe } = useMqtt();
     const { user } = useUser();
+    const { getToken } = useAuth();
+    const { publishMessage, subscribe } = useMqtt();
     const [remoteStream, setRemoteStream] = useState<MediaStream>();
     const [isLoadingCommand, setIsLoadingCommand] = useState(false);
+    const [message, setMessage] = useState('');
     const [lockState, setLockState] = useState<'locked' | 'unlocked'>(
         'unlocked',
     );
     const [peerStatus, setPeerStatus] =
         useState<RTCPeerConnectionState>('closed');
 
+    const [callId, setCallId] = useState<string | null>(null);
+    const [callHasStarted, setCallHasStarted] = useState(false);
+
     useEffect(() => {
-        startCall();
+        setCallHasStarted(callId !== null);
+        log.warn('Call ID changed:', callId);
+    }, [callId]);
+
+    useEffect(() => {
+        startWebRTCStream();
         subscribe(
             'device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f',
             (message) => {
                 setIsLoadingCommand(false);
                 const payload = JSON.parse(message);
-                const { state } = payload;
+                const { state, callId } = payload;
                 setLockState(state);
+                setCallId(callId);
             },
         );
-        return endCall;
+        return endWebRTCStream;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const startCall = () => {
+    const startCall = async () => {
+        const sn = '0fa98c5e-aaa0-427a-89e0-283cbb47a25f';
+        const token = await getToken();
+        console.log(token);
+        if (!token) {
+            log.error('No token found');
+            return;
+        }
+        await api.startCall(sn, token).then((id) => {
+            setCallHasStarted(true);
+            console.log(id);
+        });
+    };
+
+    const endCall = async () => {
+        const sn = '0fa98c5e-aaa0-427a-89e0-283cbb47a25f';
+        const token = await getToken();
+        console.log(token);
+        if (!token) {
+            log.error('No token found');
+            return;
+        }
+
+        await api.endCall(sn, token).then((id) => {
+            setCallHasStarted(false);
+            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            log.info('Call ended', id);
+        });
+    };
+
+    const startWebRTCStream = () => {
         const client = new PiCamera({
             deviceUid: '0fa98c5e-aaa0-427a-89e0-283cbb47a25f',
             mqttHost: 'fa14e40249354fa380420881ee6bc48a.s1.eu.hivemq.cloud',
@@ -76,7 +120,7 @@ export default function DeviceStream() {
             ],
         });
 
-        client.onTimeout = endCall;
+        client.onTimeout = endWebRTCStream;
         client.onStream = setRemoteStream;
         client.onConnectionState = setPeerStatus;
         client.connect();
@@ -84,7 +128,7 @@ export default function DeviceStream() {
         piCameraRef.current = client;
     };
 
-    const endCall = () => {
+    const endWebRTCStream = () => {
         if (piCameraRef.current) {
             piCameraRef.current.terminate();
             piCameraRef.current = null;
@@ -162,7 +206,10 @@ export default function DeviceStream() {
             <Animated.View style={blackBarStyle} />
             <Animated.ScrollView
                 className="w-full"
+                ref={scrollViewRef}
                 onScroll={handleScroll}
+                scrollEnabled={callHasStarted}
+                showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 contentContainerStyle={{
                     alignItems: 'flex-start',
@@ -226,92 +273,71 @@ export default function DeviceStream() {
                         style={{ height: height * (1 / 6) }}
                     >
                         <View className="w-1/3 h-[5px] bg-zinc-200 rounded-full" />
-                        <View className="flex-1 w-full h-1/6 flex-row justify-evenly items-center">
-                            <TouchableOpacity
-                                onPress={handleToggleLock}
-                                className={`justify-center items-center rounded-full h-16 w-16 border-2 ${getStyle()}`}
-                            >
-                                {isLoadingCommand ? (
-                                    <ActivityIndicator color="white" />
-                                ) : lockState === 'locked' ? (
-                                    <Unlock color={'white'} />
-                                ) : (
-                                    <Lock color={'white'} />
-                                )}
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                className={`${isMicActive ? 'bg-emerald-400' : 'bg-red-400'} justify-center items-center rounded-full h-16 w-16`}
-                                onPress={() => {
-                                    Haptics.impactAsync(
-                                        Haptics.ImpactFeedbackStyle.Light,
-                                    );
-                                    setIsMicActive(!isMicActive);
-                                }}
-                            >
-                                <FontAwesome
-                                    name={
-                                        isMicActive
-                                            ? 'microphone'
-                                            : 'microphone-slash'
-                                    }
-                                    size={24}
-                                    color="black"
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity className="justify-center items-center rounded-full bg-slate-700 h-16 w-16">
-                                <PhoneOff color={'white'} />
-                            </TouchableOpacity>
-                        </View>
+                        {callHasStarted ? (
+                            <View className="flex-1 w-full h-1/6 flex-row justify-evenly items-center">
+                                <TouchableOpacity
+                                    onPress={handleToggleLock}
+                                    className={`justify-center items-center rounded-full h-16 w-16 border-2 ${getStyle()}`}
+                                >
+                                    {isLoadingCommand ? (
+                                        <ActivityIndicator color="white" />
+                                    ) : lockState === 'locked' ? (
+                                        <Unlock color={'white'} />
+                                    ) : (
+                                        <Lock color={'white'} />
+                                    )}
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    className={`${isMicActive ? 'bg-emerald-400' : 'bg-red-400'} justify-center items-center rounded-full h-16 w-16`}
+                                    onPress={() => {
+                                        Haptics.impactAsync(
+                                            Haptics.ImpactFeedbackStyle.Light,
+                                        );
+                                        setIsMicActive(!isMicActive);
+                                    }}
+                                >
+                                    <FontAwesome
+                                        name={
+                                            isMicActive
+                                                ? 'microphone'
+                                                : 'microphone-slash'
+                                        }
+                                        size={24}
+                                        color="black"
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    className="justify-center items-center rounded-full bg-slate-700 h-16 w-16"
+                                    onPress={() => {
+                                        Haptics.impactAsync(
+                                            Haptics.ImpactFeedbackStyle.Light,
+                                        );
+
+                                        endCall();
+                                    }}
+                                >
+                                    <PhoneOff color={'white'} />
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View className="flex-1 w-full h-1/6 flex-row justify-evenly items-center">
+                                <TouchableOpacity
+                                    className="justify-center items-center rounded-full bg-emerald-400 h-16 w-16"
+                                    onPress={() => {
+                                        Haptics.impactAsync(
+                                            Haptics.ImpactFeedbackStyle.Light,
+                                        );
+
+                                        startCall();
+                                    }}
+                                >
+                                    <PhoneIcon color={'white'} />
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </Animated.View>
-                <View
-                    className="w-full flex-col justify-start items-start relative "
-                    style={{ height: height * 0.5 }}
-                >
-                    <View className="w-full px-2 h-4/6 gap-y-8 relative">
-                        <View className="w-full">
-                            <Text className="color-white text-2xl font-black">
-                                Transcrição
-                            </Text>
-                            <View className="w-full flex-row justify-start items-center gap-x-2">
-                                <Text className="color-slate-300 text-base font-light">
-                                    Abaixo estará a transcrição feita por IA
-                                </Text>
-                                <Ionicons
-                                    name="sparkles"
-                                    size={12}
-                                    color="#cbd5e1"
-                                    className="mr-2"
-                                />
-                            </View>
-                        </View>
-                        <View className="w-full h-full overflow-hidden">
-                            <ScrollView className="w-full h-full gap-y-4 overflow-hidden">
-                                <View className="w-full gap-y-4 border-indigo-200 min-h-10 border rounded-md bg-indigo-500/10 p-4 mb-4">
-                                    <View className="rounded-full bg-indigo-500/30 self-start py-1 px-4">
-                                        <Text className="text-sm text-indigo-100">
-                                            00:05
-                                        </Text>
-                                    </View>
-                                    <Text className="text-base text-indigo-100">
-                                        Oi, tudo bem?
-                                    </Text>
-                                </View>
-                            </ScrollView>
-                        </View>
-                    </View>
-                    <View className="bg-slate-950 absolute r-0 l-0 bottom-0 w-full h-16 items-center justify-between p-2 pt-4 flex-row gap-x-2">
-                        <TextInput
-                            className=" w-5/6 h-full bg-[#020617]/10 border border-slate-300 rounded-md px-2 color-zinc-100"
-                            placeholder="O que você quer falar?"
-                            placeholderClassName="font-bold"
-                            placeholderTextColor="#cbd5e1"
-                        />
-                        <TouchableOpacity className="bg-emerald-600 w-8 h-full rounded-lg justify-center items-center p-6 py-0">
-                            <SendHorizonal size={16} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                {callId != null && <StreamChat callId={callId} />}
             </Animated.ScrollView>
         </SafeAreaView>
     );

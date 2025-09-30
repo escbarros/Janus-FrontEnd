@@ -56,6 +56,7 @@ const Notifications = () => {
         try {
             setError(null);
             const token = await getToken();
+            log.info('Fetching events with token:', token);
             if (token) {
                 const userEvents = await api.getUserEvents(user.id, token);
                 const unReadEvents = userEvents

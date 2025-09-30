@@ -1,5 +1,6 @@
 import BackButton from '@/components/BackButton';
 import IconButton from '@/components/IconButton';
+import RecordingList from '@/components/RecordingList';
 import { images, log } from '@/constants';
 import { useUserStore } from '@/store';
 import { useDeviceStore } from '@/store/deviceStore';
@@ -123,21 +124,7 @@ const DeviceInfo = () => {
                             posteriormente
                         </Text>
                     </View>
-                    <View className="flex-row items-center mt-4 justify-evenly">
-                        <Image
-                            source={images.noRecordings}
-                            className="mb-8 h-24 w-24"
-                        />
-                        <View className="items-center flex-1">
-                            <Text className="color-slate-200 text-lg font-semibold">
-                                Nenhuma gravação
-                            </Text>
-                            <Text className="color-slate-300 text-center w-5/6 text-sm">
-                                Lorem ipsum dolor sit amet consectetur
-                                adipisicing elit. Corporis, ex.
-                            </Text>
-                        </View>
-                    </View>
+                    <RecordingList />
                 </View>
                 {/* USERS */}
                 <View className="w-full gap-3">
