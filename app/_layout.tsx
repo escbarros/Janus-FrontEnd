@@ -14,6 +14,7 @@ import '../i18n';
 import { MqttProvider } from '@/context/MqttContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import * as Notifications from 'expo-notifications';
+
 SplashScreen.preventAutoHideAsync();
 
 Notifications.setNotificationHandler({

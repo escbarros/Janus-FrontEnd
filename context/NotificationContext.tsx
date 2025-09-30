@@ -1,4 +1,5 @@
 import { registerForPushNotificationsAsync } from '@/utils/registerForPushNotificationsAsync';
+import { useAuth } from '@clerk/clerk-expo';
 import { EventSubscription } from 'expo-modules-core';
 import * as Notifications from 'expo-notifications';
 import React, {
@@ -37,6 +38,7 @@ interface NotificationProviderProps {
 export const NotificationProvider = ({
     children,
 }: NotificationProviderProps) => {
+    const { getToken } = useAuth();
     const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
     const [notification, setNotification] =
         useState<Notifications.Notification | null>(null);
@@ -46,7 +48,7 @@ export const NotificationProvider = ({
     const responseListener = useRef<EventSubscription | null>(null);
 
     useEffect(() => {
-        registerForPushNotificationsAsync().then(
+        registerForPushNotificationsAsync(getToken).then(
             (token) => setExpoPushToken(token),
             (error) => setError(error),
         );

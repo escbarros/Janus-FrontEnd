@@ -8,6 +8,9 @@
         "scheme": "janusfrontend",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
+        "notification": {
+            "icon": "./assets/images/icon.png"
+        },
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.escbarros.janus"
@@ -15,7 +18,7 @@
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#030712"
+                "backgroundColor": "#0F172A"
             },
             "edgeToEdgeEnabled": true,
             "package": "com.escbarros.janus",

@@ -4,9 +4,37 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-export async function registerForPushNotificationsAsync() {
+export async function registerForPushNotificationsAsync(
+    getToken: () => Promise<string | null>,
+) {
     log.debug('registering for notifications');
     if (Platform.OS === 'android') {
+        Notifications.setNotificationCategoryAsync('invite', [
+            {
+                identifier: 'ACCEPT',
+                buttonTitle: 'Aceitar',
+                options: { opensAppToForeground: true },
+            },
+            {
+                identifier: 'DECLINE',
+                buttonTitle: 'Recusar',
+                options: { opensAppToForeground: false },
+            },
+        ]);
+
+        Notifications.addNotificationResponseReceivedListener(
+            async (response) => {
+                const actionId = response.actionIdentifier;
+                const token = await getToken();
+                console.log('Token: ', token);
+                if (!token) return;
+                if (actionId === 'ACCEPT') {
+                    console.log('✅ Usuário aceitou\n', token);
+                } else if (actionId === 'DECLINE') {
+                    console.log('❌ Usuário recusou\n', token);
+                }
+            },
+        );
         await Notifications.setNotificationChannelAsync('default', {
             name: 'default',
             importance: Notifications.AndroidImportance.MAX,
@@ -43,7 +71,6 @@ export async function registerForPushNotificationsAsync() {
                     projectId,
                 })
             ).data;
-            log.info('Push token string:', pushTokenString);
             return pushTokenString;
         } catch (e: unknown) {
             throw new Error(`${e}`);
