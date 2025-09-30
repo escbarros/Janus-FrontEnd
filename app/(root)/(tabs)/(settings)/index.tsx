@@ -1,4 +1,5 @@
 import { log } from '@/constants';
+import { api } from '@/utils/api';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { LogOut, Pencil } from 'lucide-react-native';
@@ -7,11 +8,16 @@ import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 const Settings = () => {
     const { user } = useUser();
-    const { signOut } = useAuth();
+    const { signOut, getToken } = useAuth();
 
     const handleSignOut = async () => {
         try {
             log.debug('Signing out...');
+            const token = await getToken();
+            if (!token) return;
+
+            await api.removeUserNotificationToken(token);
+
             await signOut();
             router.replace('/(auth)/login');
         } catch (error) {

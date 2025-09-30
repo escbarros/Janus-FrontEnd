@@ -24,10 +24,18 @@ export const useUserData = () => {
             try {
                 const token = await getToken();
                 log.info('User token: ', token);
+                if (!token) return;
                 const userData = await api.getUserByClerkId(
                     userId,
                     token as string,
                 );
+
+                if (
+                    userData.notificationToken !== expoPushToken &&
+                    expoPushToken != null
+                ) {
+                    await api.patchUserNotificationToken(expoPushToken, token);
+                }
                 setUser(userData);
             } catch (err) {
                 const errorMessage =

@@ -16,4 +16,45 @@ export const userApi = {
             throw error;
         }
     },
+
+    async patchUserNotificationToken(
+        notificationToken: string,
+        jwtToken: string,
+    ) {
+        try {
+            const response = await apiClient.patch(
+                `/user/add-notification`,
+                {
+                    notificationToken,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${jwtToken}`,
+                    },
+                },
+            );
+            return response.data;
+        } catch (error: any) {
+            log.error('Failed to fetch user data', error);
+            throw error;
+        }
+    },
+
+    async removeUserNotificationToken(jwtToken: string) {
+        try {
+            const response = await apiClient.patch(
+                `/user/remove-notification`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${jwtToken}`,
+                    },
+                },
+            );
+            return response.data;
+        } catch (error: any) {
+            log.error('Failed to fetch user data', error);
+            throw error;
+        }
+    },
 };
