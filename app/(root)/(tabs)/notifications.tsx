@@ -104,6 +104,8 @@ const Notifications = () => {
                 datetime={item.timestamp}
                 deviceId={item.device?.serialNumber}
                 deviceName={item.device?.nickname}
+                user={item.user}
+                inviteId={item.inviteId}
                 showDeviceName
                 showBackground={item.readAt === null}
                 isNewNotification={item.readAt === null}

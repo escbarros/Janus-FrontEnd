@@ -5,9 +5,15 @@ export interface Event {
     deviceSerialNumber: string;
     type: EventType;
     readAt: Date | null;
+    inviteId?: string | null;
     device?: {
         serialNumber: string;
         nickname: string;
+    };
+    user?: {
+        id: string;
+        name: string;
+        picUrl: string;
     };
 }
 

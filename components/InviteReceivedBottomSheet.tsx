@@ -20,7 +20,6 @@ const InviteReceivedBottomSheet = ({
     bottomSheetRef,
     datetime,
     deviceName,
-    deviceId,
 }: InviteReceivedBottomSheetProps) => {
     const snapPoints = ['33%'];
 

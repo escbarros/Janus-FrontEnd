@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { api } from './api';
 
 export async function registerForPushNotificationsAsync(
     getToken: () => Promise<string | null>,
@@ -25,13 +26,24 @@ export async function registerForPushNotificationsAsync(
         Notifications.addNotificationResponseReceivedListener(
             async (response) => {
                 const actionId = response.actionIdentifier;
+                const notificationId = response.notification.request.identifier;
+                const inviteId = response.notification.request.content.data
+                    ?.inviteId as string;
+
                 const token = await getToken();
-                console.log('Token: ', token);
                 if (!token) return;
-                if (actionId === 'ACCEPT') {
-                    console.log('✅ Usuário aceitou\n', token);
-                } else if (actionId === 'DECLINE') {
-                    console.log('❌ Usuário recusou\n', token);
+                try {
+                    if (actionId === 'ACCEPT') {
+                        await api.acceptInvite(inviteId, token);
+                    } else if (actionId === 'DECLINE') {
+                        await api.rejectInvite(inviteId, token);
+                    }
+
+                    await Notifications.dismissNotificationAsync(
+                        notificationId,
+                    );
+                } catch (error) {
+                    console.error('Error dismissing notification:', error);
                 }
             },
         );

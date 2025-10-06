@@ -1,4 +1,5 @@
 import { EventType } from '@/types/event';
+import { InviteDetails } from '@/types/invite';
 import { formatDateTime } from '@/utils';
 import { api } from '@/utils/api/index';
 import { useAuth } from '@clerk/clerk-expo';
@@ -18,13 +19,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import DoorbellBottomSheet from './DoorbellBottomSheet';
 import InviteReceivedBottomSheet from './InviteReceivedBottomSheet';
-
+import InviteSentBottomSheet from './InviteSentBottomSheet';
+interface UserProps {
+    id: string;
+    name: string;
+    picUrl: string;
+}
 export interface EventCardProps {
     id: string;
     type?: EventType;
     datetime?: string;
     deviceName?: string;
     deviceId: string | undefined;
+    user?: UserProps | undefined;
+    inviteId?: string | null;
     isNewNotification?: boolean;
     showUserEventEmitter?: boolean;
     showDeviceName?: boolean;
@@ -65,7 +73,7 @@ const EVENT_CONFIG = {
         bgColor: 'bg-orange-400/25',
         icon: <SendHorizontal size={24} color="#fff" />,
         text: 'Convite enviado',
-        openBottomSheet: false,
+        openBottomSheet: true,
     },
     INVITE_ACCEPTED: {
         color: 'bg-teal-500',
@@ -89,6 +97,8 @@ const EventCard = ({
     datetime = Date.now().toString(),
     deviceName,
     deviceId,
+    user = { id: '', picUrl: '', name: '' },
+    inviteId,
     isNewNotification = false,
     showUserEventEmitter = true,
     showDeviceName = true,
@@ -100,6 +110,7 @@ const EventCard = ({
     const cardBg =
         isNewNotification || showBackground ? config.bgColor : 'bg-transparent';
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [invite, setInvite] = useState<InviteDetails | null>(null);
     const onPressEvent = () => {
         if (config.openBottomSheet) {
             bottomSheetRef.current?.expand();
@@ -119,9 +130,24 @@ const EventCard = ({
         }
     }, [id, getToken]);
 
+    const fetchInviteDetails = useCallback(async () => {
+        try {
+            setInvite(null);
+            const token = await getToken();
+            if (token && inviteId) {
+                const inviteDetails = await api.getInvite(inviteId, token);
+                setInvite(inviteDetails);
+            }
+        } catch (error) {
+            console.error('Error fetching invite info:', error);
+        }
+    }, [inviteId, getToken]);
+
     useEffect(() => {
         if (type === 'DOORBELL') {
             fetchEventImage();
+        } else if (type === 'INVITE_RECEIVED' || type === 'INVITE_SENT') {
+            fetchInviteDetails();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -157,13 +183,13 @@ const EventCard = ({
                             <View className="w-4 h-4 rounded-full bg-slate-700 overflow-hidden">
                                 <Image
                                     source={{
-                                        uri: 'https://img.freepik.com/fotos-gratis/retrato-de-homem-branco-isolado_53876-40306.jpg?semt=ais_hybrid&w=740',
+                                        uri: user.picUrl,
                                     }}
                                     className="w-full h-full"
                                 />
                             </View>
                             <Text className="color-white text-xs font-light">
-                                Por Nome da pessoa
+                                Por {user.name}
                             </Text>
                         </View>
                     ) : (
@@ -198,6 +224,15 @@ const EventCard = ({
                         datetime={formatDateTime(datetime) || ''}
                         deviceName={deviceName}
                         deviceId={deviceId}
+                    />
+                )}
+                {type === 'INVITE_SENT' && (
+                    <InviteSentBottomSheet
+                        user={user}
+                        invite={invite}
+                        bottomSheetRef={bottomSheetRef}
+                        datetime={formatDateTime(datetime) || ''}
+                        deviceName={deviceName}
                     />
                 )}
             </Portal>
