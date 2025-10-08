@@ -62,18 +62,17 @@ export default function DeviceStream() {
 
     useEffect(() => {
         startWebRTCStream();
-        subscribe(
-            'device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f',
-            (message) => {
-                setIsLoadingCommand(false);
-                const payload = JSON.parse(message);
-                const { state, callId } = payload;
-                setLockState(state);
-                setCallId(callId);
-            },
-        );
+
+        const topic = 'device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f';
+        subscribe(topic, (message) => {
+            setIsLoadingCommand(false);
+            const payload = JSON.parse(message);
+            console.log('Received message on topic', topic, ':', payload);
+            setLockState(payload.state);
+            setCallId(payload.callId);
+        });
+
         return endWebRTCStream;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const startCall = async () => {

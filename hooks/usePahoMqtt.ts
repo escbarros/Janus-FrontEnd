@@ -24,76 +24,86 @@ export function usePahoMqtt() {
     const [lastMessage, setLastMessage] = useState<MqttMessage | null>(null);
     const clientRef = useRef<Paho.Client | null>(null);
     const listenersRef = useRef<Record<string, MessageCallback>>({});
+    const credentialsRef = useRef<{
+        username: string;
+        password: string;
+    } | null>(null);
 
-    useEffect(() => {
-        return () => {
+    // 🔁 Reconnect helper
+    const reconnect = useCallback(() => {
+        const creds = credentialsRef.current;
+        if (!creds) return;
+        log.warn('🔁 Tentando reconectar ao broker MQTT...');
+        connect(creds.username, creds.password);
+    }, []);
+
+    const connect = useCallback(
+        (username: string, password: string) => {
+            credentialsRef.current = { username, password };
+
             if (clientRef.current?.isConnected()) {
-                clientRef.current.disconnect();
+                log.info('Client already connected.');
+                return;
             }
-        };
-    }, []);
 
-    const connect = useCallback((username: string, password: string) => {
-        if (clientRef.current?.isConnected()) {
-            log.info('Client already connected.');
-            return;
-        }
+            setConnectionStatus('Connecting...');
+            log.info('Attempting to connect to HiveMQ Cloud broker...');
 
-        setConnectionStatus('Connecting...');
-        console.log('Attempting to connect to HiveMQ Cloud broker...');
+            const clientId = `paho_${Math.random().toString(16).slice(2, 10)}`;
+            const client = new Paho.Client(BROKER_URL, clientId);
+            clientRef.current = client;
 
-        const clientId = `paho_${Math.random().toString(16).substr(2, 8)}`;
-        const client = new Paho.Client(BROKER_URL, clientId);
-        clientRef.current = client;
+            client.onConnectionLost = (responseObject: any) => {
+                if (responseObject.errorCode !== 0) {
+                    log.error('Connection lost:', responseObject.errorMessage);
+                    setConnectionStatus('Error');
+                    // 🔁 tenta reconectar após 3 segundos
+                    setTimeout(reconnect, 3000);
+                } else {
+                    log.info('Connection closed cleanly.');
+                    setConnectionStatus('Disconnected');
+                }
+            };
 
-        client.onConnectionLost = (responseObject: any) => {
-            if (responseObject.errorCode !== 0) {
-                log.error('Connection lost:', responseObject.errorMessage);
-                setConnectionStatus('Error');
-            } else {
-                log.info('Connection lost.');
-                setConnectionStatus('Disconnected');
-            }
-        };
+            client.onMessageArrived = (message: Paho.Message) => {
+                const topic = message.destinationName;
+                const payload = message.payloadString;
+                setLastMessage({ topic, payload });
 
-        client.onMessageArrived = (message: Paho.Message) => {
-            const topic = message.destinationName;
-            const payload = message.payloadString;
+                const callback = listenersRef.current[topic];
+                if (callback) callback(payload);
+            };
 
-            setLastMessage({ topic, payload });
+            client.connect({
+                userName: username,
+                password: password,
+                useSSL: true,
+                timeout: 10,
+                onSuccess: () => {
+                    log.debug('✅ Conectado ao HiveMQ Cloud!');
+                    setConnectionStatus('Connected');
 
-            if (listenersRef.current[topic]) {
-                listenersRef.current[topic](payload);
-            }
-        };
-
-        client.connect({
-            userName: username,
-            password: password,
-            useSSL: true,
-            timeout: 10,
-            onSuccess: () => {
-                log.info('Successfully connected to HiveMQ Cloud!');
-                setConnectionStatus('Connected');
-
-                Object.keys(listenersRef.current).forEach((topic) => {
-                    client.subscribe(topic, {
-                        qos: 1,
-                        onSuccess: () =>
-                            log.info(
-                                `Subscribed to pre-registered topic: ${topic}`,
-                            ),
-                        onFailure: (err) =>
-                            log.error(`Failed to subscribe to ${topic}`, err),
+                    // 🔄 re-subscreve em todos os tópicos registrados
+                    Object.keys(listenersRef.current).forEach((topic) => {
+                        client.subscribe(topic, {
+                            qos: 1,
+                            onSuccess: () =>
+                                log.info(`Reinscrito em: ${topic}`),
+                            onFailure: (err) =>
+                                log.error(`Falha ao reinscrever ${topic}`, err),
+                        });
                     });
-                });
-            },
-            onFailure: (responseObject: any) => {
-                log.error('Connection failed:', responseObject);
-                setConnectionStatus('Error');
-            },
-        });
-    }, []);
+                },
+                onFailure: (responseObject: any) => {
+                    log.error('Connection failed:', responseObject);
+                    setConnectionStatus('Error');
+                    // tenta reconectar depois de 5s
+                    setTimeout(reconnect, 5000);
+                },
+            });
+        },
+        [reconnect],
+    );
 
     const disconnect = useCallback(() => {
         if (clientRef.current?.isConnected()) {
@@ -109,7 +119,7 @@ export function usePahoMqtt() {
             messageObject.destinationName = topic;
             messageObject.qos = 1;
             clientRef.current.send(messageObject);
-            log.info(`Message sent to topic '${topic}'`);
+            log.info(`📤 Mensagem enviada para '${topic}'`);
         } else {
             log.warn('Cannot publish: client is not connected.');
         }
@@ -118,20 +128,14 @@ export function usePahoMqtt() {
     const subscribe = useCallback(
         (topic: string, callback: MessageCallback) => {
             listenersRef.current[topic] = callback;
-            log.info(`Listener registered for topic: ${topic}`);
+            log.info(`🪝 Listener registrado para: ${topic}`);
 
             if (clientRef.current?.isConnected()) {
                 clientRef.current.subscribe(topic, {
                     qos: 1,
-                    onSuccess: () => {
-                        log.info(`Successfully subscribed to topic: ${topic}`);
-                    },
-                    onFailure: (responseObject: any) => {
-                        log.error(
-                            `Failed to subscribe to topic ${topic}`,
-                            responseObject,
-                        );
-                    },
+                    onSuccess: () => log.info(`✅ Subscrito: ${topic}`),
+                    onFailure: (err) =>
+                        log.error(`❌ Falha ao subscrever ${topic}`, err),
                 });
             }
         },
@@ -140,21 +144,25 @@ export function usePahoMqtt() {
 
     const unsubscribe = useCallback((topic: string) => {
         delete listenersRef.current[topic];
-        log.info(`Listener removed for topic: ${topic}`);
+        log.info(`Listener removido para: ${topic}`);
 
         if (clientRef.current?.isConnected()) {
             clientRef.current.unsubscribe(topic, {
-                onSuccess: () => {
-                    log.info(`Successfully unsubscribed from topic: ${topic}`);
-                },
-                onFailure: (responseObject: any) => {
-                    log.error(
-                        `Failed to unsubscribe from topic ${topic}`,
-                        responseObject,
-                    );
-                },
+                onSuccess: () =>
+                    log.info(`✅ Unsubscrito com sucesso: ${topic}`),
+                onFailure: (err) =>
+                    log.error(`❌ Falha ao unsubscribir ${topic}`, err),
             });
         }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (clientRef.current?.isConnected()) {
+                clientRef.current.disconnect();
+                log.info('🔌 Cliente MQTT desconectado no unmount.');
+            }
+        };
     }, []);
 
     return {
