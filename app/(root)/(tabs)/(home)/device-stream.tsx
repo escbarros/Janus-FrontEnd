@@ -61,8 +61,6 @@ export default function DeviceStream() {
     }, [callId]);
 
     useEffect(() => {
-        startWebRTCStream();
-
         const topic = 'device/status/0fa98c5e-aaa0-427a-89e0-283cbb47a25f';
         subscribe(topic, (message) => {
             setIsLoadingCommand(false);
@@ -71,6 +69,8 @@ export default function DeviceStream() {
             setLockState(payload.state);
             setCallId(payload.callId);
         });
+
+        //startWebRTCStream();
 
         return endWebRTCStream;
     }, []);
