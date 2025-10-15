@@ -60,6 +60,7 @@ const EditProfile = () => {
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.8,
+                base64: true,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -90,6 +91,7 @@ const EditProfile = () => {
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.8,
+                base64: true,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -110,14 +112,18 @@ const EditProfile = () => {
                 Alert.alert('Erro', 'Usuário não encontrado.');
                 return;
             }
+            const blob = await fetch(asset.uri).then((res) => res.blob());
+            const fileName = asset.uri.split('/').pop() || 'photo.jpg';
+            const file = new File([blob], fileName, {
+                type: blob.type || 'image/jpeg',
+            });
+            await user.setProfileImage({ file });
 
-            const response = await fetch(asset.uri);
-            const blob = await response.blob();
+            await user.setProfileImage({ file }).catch((err) => {
+                log.error('Error updating profile image:', err);
+            });
 
-            await user.setProfileImage({ file: blob });
-
-            log.debug('Profile image updated successfully');
-            Alert.alert('Sucesso', 'Foto de perfil atualizada com sucesso!');
+            await user.reload();
         } catch (error) {
             log.error('Error updating profile image:', error);
             Alert.alert('Erro', 'Não foi possível atualizar a foto de perfil.');

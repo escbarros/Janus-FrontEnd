@@ -16,6 +16,7 @@ interface UserState {
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
     clearUser: () => void;
+    updateDeviceNickname: (serialNumber: string, nickname: string) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -26,4 +27,23 @@ export const useUserStore = create<UserState>((set) => ({
     setLoading: (isLoading) => set({ isLoading }),
     setError: (error) => set({ error }),
     clearUser: () => set({ user: null, error: null, isLoading: false }),
+    updateDeviceNickname: (serialNumber: string, nickname: string) => {
+        set((state) => {
+            if (!state.user) return state;
+
+            const updatedDevices = state.user.devices.map((device) =>
+                device.serialNumber === serialNumber
+                    ? { ...device, nickname }
+                    : device,
+            );
+
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    devices: updatedDevices,
+                },
+            };
+        });
+    },
 }));

@@ -93,7 +93,8 @@ const RecordingList = () => {
         };
 
         fetchCalls();
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     if (calls.length === 0) return <NoRecordings />;
     return (
         <FlatList

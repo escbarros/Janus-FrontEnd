@@ -1,3 +1,4 @@
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { Eye, EyeClosed, LucideIcon, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -11,6 +12,8 @@ interface InputFieldProps {
     errorMessage?: string;
     value: string;
     onChangeText: (text: string) => void;
+    isBottomSheet?: boolean;
+    onBlur?: () => void;
 }
 export default function InputField({
     label = '',
@@ -21,6 +24,8 @@ export default function InputField({
     errorMessage = '',
     value,
     onChangeText,
+    isBottomSheet = false,
+    onBlur = () => {},
 }: InputFieldProps) {
     const [secureTextEntry, setSecureTextEntry] = useState(isPassword);
     const [hasError, setHasError] = useState(
@@ -55,15 +60,33 @@ export default function InputField({
                 {IconComponent && (
                     <IconComponent color="white" className="absolute" />
                 )}
-                <TextInput
-                    value={value}
-                    onChangeText={onChangeText}
-                    keyboardType={type}
-                    placeholder={placeholder}
-                    className={`${statusColor} p-0 m-0 text-xl w-full`}
-                    placeholderTextColor="#cbd5e1"
-                    secureTextEntry={secureTextEntry}
-                />
+                {isBottomSheet ? (
+                    <>
+                        <BottomSheetTextInput
+                            value={value}
+                            onChangeText={onChangeText}
+                            keyboardType={type}
+                            placeholder={placeholder}
+                            className={`${statusColor} p-0 m-0 text-xl w-full`}
+                            placeholderTextColor="#cbd5e1"
+                            secureTextEntry={secureTextEntry}
+                            onBlur={onBlur}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <TextInput
+                            value={value}
+                            onChangeText={onChangeText}
+                            keyboardType={type}
+                            placeholder={placeholder}
+                            className={`${statusColor} p-0 m-0 text-xl w-full`}
+                            placeholderTextColor="#cbd5e1"
+                            secureTextEntry={secureTextEntry}
+                            onBlur={onBlur}
+                        />
+                    </>
+                )}
                 {isPassword && (
                     <TouchableOpacity
                         className="absolute right-3"

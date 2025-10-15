@@ -8,11 +8,13 @@ interface CustomButtonProps {
     mode?: 'primary' | 'secondary' | 'reject';
     appendIcon?: LucideIcon | any;
     iconLibrary?: 'lucide' | 'antdesign';
+    isDisabled?: boolean;
     onPress?: () => void;
 }
 
 export default function CustomButton({
     text,
+    isDisabled = false,
     mode = 'primary',
     appendIcon,
     iconLibrary = 'lucide',
@@ -30,8 +32,9 @@ export default function CustomButton({
 
     return (
         <TouchableOpacity
-            className={`w-full justify-center items-center flex-row gap-1.5 py-2 rounded-xl ${containerStyle}`}
-            onPress={onPress}
+            className={`w-full justify-center items-center flex-row gap-1.5 py-2 rounded-xl ${containerStyle} ${isDisabled ? 'opacity-50' : ''}`}
+            onPress={isDisabled ? () => {} : onPress}
+            disabled={isDisabled}
         >
             {appendIcon && iconLibrary === 'antdesign' && (
                 <AntDesign
