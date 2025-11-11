@@ -3,6 +3,7 @@ import IconButton from '@/components/IconButton';
 import NoDevices from '@/components/NoDevices';
 import { useUserStore } from '@/store';
 import { useUser } from '@clerk/clerk-expo';
+import { router } from 'expo-router';
 import { LayoutPanelTop, Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -72,7 +73,12 @@ const Homepage = () => {
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-4 justify-end">
-                        <IconButton icon={Plus}></IconButton>
+                        <IconButton
+                            icon={Plus}
+                            onPress={() =>
+                                router.push(`/(root)/(tabs)/(home)/(setup)`)
+                            }
+                        ></IconButton>
                         <IconButton
                             mode="tertiary"
                             icon={LayoutPanelTop}

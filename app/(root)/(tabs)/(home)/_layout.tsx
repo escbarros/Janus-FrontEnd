@@ -35,6 +35,12 @@ const Layout = () => {
                     title: 'Call',
                 }}
             />
+            <Stack.Screen
+                name="(setup)"
+                options={{
+                    title: 'setup',
+                }}
+            />
         </Stack>
     );
 };

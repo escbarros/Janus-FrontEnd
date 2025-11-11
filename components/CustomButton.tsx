@@ -49,7 +49,11 @@ export default function CustomButton({
                     size: 20,
                     color: mode === 'primary' ? '#ffffff' : '#10b981',
                 })}
-            <Text className={`text-xl font-medium ${textStyle}`}>{text}</Text>
+            <Text
+                className={`text-xl font-medium ${textStyle} text-center ${!appendIcon ? 'flex-1' : ''}`}
+            >
+                {text}
+            </Text>
         </TouchableOpacity>
     );
 }

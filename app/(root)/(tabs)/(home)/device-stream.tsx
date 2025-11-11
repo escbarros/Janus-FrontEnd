@@ -70,7 +70,7 @@ export default function DeviceStream() {
             setCallId(payload.callId);
         });
 
-        //startWebRTCStream();
+        startWebRTCStream();
 
         return endWebRTCStream;
     }, []);

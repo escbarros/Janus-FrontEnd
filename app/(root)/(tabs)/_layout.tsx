@@ -4,8 +4,10 @@ import { Dimensions, View } from 'react-native';
 const { width } = Dimensions.get('screen');
 export default function Layout() {
     const pathname = usePathname();
+    console.log(pathname);
     const hideNavScreen =
         pathname.includes('device-stream') ||
+        pathname.includes('(setup)') ||
         pathname.includes('(call)') ||
         /^\/c[a-zA-Z0-9]+$/.test(pathname);
 
