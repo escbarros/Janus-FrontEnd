@@ -1,5 +1,5 @@
 import CustomButton from '@/components/CustomButton';
-// import LottieView from 'lottie-react-native';
+import LottieView from 'lottie-react-native';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -10,13 +10,13 @@ interface PairingStepProps {
 const PairingStep: React.FC<PairingStepProps> = ({ onNext }) => {
     return (
         <View className="flex-1 items-center justify-center gap-8">
-            <View className="bg-emerald-300 w-24 h-24 rounded-full bg-primary items-center justify-center">
-                {/* <LottieView
+            <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
+                <LottieView
                     source={require('@/assets/pulse.json')}
                     autoPlay
                     loop
                     style={{ width: 96, height: 96 }}
-                /> */}
+                />
             </View>
             <Text className="text-gray-400 text-center px-8">
                 Pressione o botão por{' '}

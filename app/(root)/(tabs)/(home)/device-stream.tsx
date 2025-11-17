@@ -40,6 +40,7 @@ export default function DeviceStream() {
     const scrollViewRef = useRef<Animated.ScrollView>(null);
 
     const piCameraRef = useRef<PiCamera | null>(null);
+    const hasStreamStarted = useRef(false);
     const { user } = useUser();
     const { getToken } = useAuth();
     const { publishMessage, subscribe } = useMqtt();
@@ -70,7 +71,7 @@ export default function DeviceStream() {
             setCallId(payload.callId);
         });
 
-        startWebRTCStream();
+        //startWebRTCStream();
 
         return endWebRTCStream;
     }, []);
@@ -223,7 +224,7 @@ export default function DeviceStream() {
                         className="w-full bg-slate-800 rounded-2xl rounded-tl-none rounded-tr-none overflow-hidden relative items-start justify-start"
                         style={[animatedStyle]}
                     >
-                        {remoteStream && (
+                        {remoteStream ? (
                             <RTCView
                                 ref={rtcViewRef}
                                 collapsable={false}
@@ -231,6 +232,11 @@ export default function DeviceStream() {
                                 objectFit={'cover'}
                                 style={{ width: '100%', height: '100%' }}
                             />
+                        ) : (
+                            <TouchableOpacity
+                                className="h-full w-full"
+                                onPress={startWebRTCStream}
+                            ></TouchableOpacity>
                         )}
                         <TouchableOpacity
                             onPress={router.back}

@@ -4,6 +4,7 @@ import { Dimensions, FlatList, Text, View, ViewToken } from 'react-native';
 import FoundStep from './components/FoundStep';
 import PairingStep from './components/PairingStep';
 import SearchingStep from './components/SearchingStep';
+import SuccessStep from './components/SuccessStep';
 import WiFiListStep from './components/WiFiListStep';
 
 const { width } = Dimensions.get('window');
@@ -12,7 +13,7 @@ interface SlideData {
     id: string;
     title: string;
     description: string;
-    type: 'pairing' | 'searching' | 'found' | 'wifi';
+    type: 'pairing' | 'searching' | 'found' | 'wifi' | 'success';
 }
 
 const slides: SlideData[] = [
@@ -40,6 +41,12 @@ const slides: SlideData[] = [
         title: 'WiFi List',
         description: 'Conectar a internet',
         type: 'wifi',
+    },
+    {
+        id: '5',
+        title: 'Success',
+        description: 'Dispositivo adicionado com sucesso',
+        type: 'success',
     },
 ];
 
@@ -98,7 +105,10 @@ const DeviceSetup = () => {
                 return <FoundStep onNext={handleNext} onRetry={handleRetry} />;
 
             case 'wifi':
-                return <WiFiListStep />;
+                return <WiFiListStep onNext={handleNext} />;
+
+            case 'success':
+                return <SuccessStep />;
 
             default:
                 return null;

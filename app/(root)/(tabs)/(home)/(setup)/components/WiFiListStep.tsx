@@ -1,5 +1,5 @@
 import CustomButton from '@/components/CustomButton';
-import { ChevronRight, Lock, RefreshCw, Wifi } from 'lucide-react-native';
+import { ChevronRight, Lock, Wifi } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -23,7 +23,11 @@ interface WifiNetwork {
     timestamp: number;
 }
 
-const WiFiListStep: React.FC = () => {
+interface WiFiListStepProps {
+    onNext?: () => void;
+}
+
+const WiFiListStep: React.FC<WiFiListStepProps> = ({ onNext }) => {
     const [networks, setNetworks] = useState<WifiNetwork[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedNetwork, setSelectedNetwork] = useState<WifiNetwork | null>(
@@ -31,6 +35,7 @@ const WiFiListStep: React.FC = () => {
     );
     const [password, setPassword] = useState('');
     const [showPasswordInput, setShowPasswordInput] = useState(false);
+    const [isConnecting, setIsConnecting] = useState(false);
 
     const requestPermissions = async () => {
         if (Platform.OS === 'android') {
@@ -70,7 +75,6 @@ const WiFiListStep: React.FC = () => {
                 }
 
                 const wifiList = await WifiManager.loadWifiList();
-                // Remove duplicatas e ordena por intensidade do sinal
                 const uniqueNetworks = wifiList
                     .filter(
                         (network, index, self) =>
@@ -91,38 +95,6 @@ const WiFiListStep: React.FC = () => {
         loadWifiNetworks();
     }, []);
 
-    const loadWifiNetworks = async () => {
-        setLoading(true);
-        try {
-            const hasPermission = await requestPermissions();
-            if (!hasPermission) {
-                Alert.alert(
-                    'Permissão Necessária',
-                    'Precisamos de permissão de localização para escanear redes WiFi',
-                );
-                setLoading(false);
-                return;
-            }
-
-            const wifiList = await WifiManager.loadWifiList();
-            // Remove duplicatas e ordena por intensidade do sinal
-            const uniqueNetworks = wifiList
-                .filter(
-                    (network, index, self) =>
-                        index ===
-                        self.findIndex((n) => n.SSID === network.SSID),
-                )
-                .sort((a, b) => b.level - a.level);
-
-            setNetworks(uniqueNetworks);
-        } catch (error) {
-            console.error('Erro ao carregar redes WiFi:', error);
-            Alert.alert('Erro', 'Não foi possível carregar as redes WiFi');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const isNetworkSecured = (capabilities: string) => {
         return (
             capabilities.includes('WPA') ||
@@ -135,45 +107,16 @@ const WiFiListStep: React.FC = () => {
         setSelectedNetwork(network);
         if (isNetworkSecured(network.capabilities)) {
             setShowPasswordInput(true);
-        } else {
-            // Rede aberta, conecta direto
-            connectToNetwork(network, '');
-        }
-    };
-
-    const connectToNetwork = async (network: WifiNetwork, pwd: string) => {
-        try {
-            if (isNetworkSecured(network.capabilities)) {
-                await WifiManager.connectToProtectedSSID(
-                    network.SSID,
-                    pwd,
-                    false,
-                    false,
-                );
-            } else {
-                // Para redes abertas no Android
-                if (Platform.OS === 'android') {
-                    await WifiManager.connectToProtectedSSID(
-                        network.SSID,
-                        '',
-                        false,
-                        false,
-                    );
-                }
-            }
-            Alert.alert('Sucesso', `Conectado à rede ${network.SSID}`);
-            setShowPasswordInput(false);
-            setPassword('');
-            setSelectedNetwork(null);
-        } catch (error) {
-            console.error('Erro ao conectar:', error);
-            Alert.alert('Erro', 'Não foi possível conectar à rede');
         }
     };
 
     const handleConnect = () => {
-        if (selectedNetwork) {
-            connectToNetwork(selectedNetwork, password);
+        if (selectedNetwork && onNext) {
+            setIsConnecting(true);
+            setTimeout(() => {
+                setIsConnecting(false);
+                onNext();
+            }, 3000);
         }
     };
 
@@ -185,7 +128,7 @@ const WiFiListStep: React.FC = () => {
 
         return (
             <Pressable
-                className="flex-row items-center justify-between bg-dark-card py-4 px-4 mb-2 rounded-lg active:opacity-70"
+                className="flex-row items-center justify-between bg-dark-card py-4 px-4 mb-2 rounded-lg active:opacity-70 w-full"
                 onPress={() => handleNetworkPress(item)}
             >
                 <View className="flex-row items-center gap-3 flex-1">
@@ -212,6 +155,20 @@ const WiFiListStep: React.FC = () => {
     };
 
     if (showPasswordInput && selectedNetwork) {
+        if (isConnecting) {
+            return (
+                <View className="flex-1 items-center justify-center px-8">
+                    <ActivityIndicator size="large" color="#14b8a6" />
+                    <Text className="text-white text-xl font-bold mt-8 mb-2">
+                        Conectando à {selectedNetwork.SSID}
+                    </Text>
+                    <Text className="text-gray-400 text-sm text-center">
+                        Aguarde enquanto estabelecemos a conexão...
+                    </Text>
+                </View>
+            );
+        }
+
         return (
             <View className="flex-1 items-center justify-center px-8">
                 <Wifi size={64} color="#14b8a6" strokeWidth={1.5} />
@@ -259,16 +216,6 @@ const WiFiListStep: React.FC = () => {
                 Selecione uma rede WiFi para conectar ao novo dispositivo
             </Text>
 
-            <View className="w-full px-6 mb-4">
-                <CustomButton
-                    text="Atualizar Lista"
-                    mode="secondary"
-                    appendIcon={RefreshCw}
-                    onPress={loadWifiNetworks}
-                    isDisabled={loading}
-                />
-            </View>
-
             {loading ? (
                 <View className="flex-1 items-center justify-center">
                     <ActivityIndicator size="large" color="#14b8a6" />
@@ -291,7 +238,8 @@ const WiFiListStep: React.FC = () => {
                     data={networks}
                     renderItem={renderWifiItem}
                     keyExtractor={(item, index) => `${item.SSID}-${index}`}
-                    className="w-full px-6"
+                    className="w-full"
+                    contentContainerClassName="w-full"
                     showsVerticalScrollIndicator={false}
                 />
             )}
